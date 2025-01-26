@@ -47,7 +47,7 @@ import {
 import { Textarea } from "../ui/product-ui/Textarea";
 import { Switch } from "../ui/product-ui/Switch";
 import axios from "axios";
-import { json } from "express";
+// import { json } from "express";
 
 const PRODUCT_API_URL = "http://localhost:5000/api/product";
 
@@ -97,15 +97,12 @@ export default function ProductsPage() {
 
   const handleUpdateProduct = async (productData) => {
     try {
-      if (!productData._id) {
-        throw new Error("Product ID is missing");
-      }
-
-      console.log("Updating product with ID:", productData._id);
-
+      // Remove bidDuration if not applicable
+      const { bidDuration, ...dataToSend } = productData;
+  
       const response = await axios.put(
-        `${PRODUCT_API_URL}/update-product/${productData._id}`,
-        productData,
+        `${PRODUCT_API_URL}/update-product/${dataToSend._id}`,
+        dataToSend,
         {
           headers: {
             "Content-Type": "application/json",
@@ -114,9 +111,9 @@ export default function ProductsPage() {
           withCredentials: true,
         }
       );
-
+  
       if (response.data) {
-        await fetchProducts(); // Refresh products after update
+        await fetchProducts();
         setShowUpdateDialog(false);
         setShowAuctionExtend(false);
       }
@@ -129,7 +126,7 @@ export default function ProductsPage() {
       console.error("Error updating product:", err);
     }
   };
-
+  
   const handleDeleteProduct = async (productId) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
       try {
@@ -145,31 +142,32 @@ export default function ProductsPage() {
     try {
       const formData = new FormData();
   
-      // Append all text fields
-      Object.keys(productData).forEach(key => {
+      // Append all text fields first
+      Object.keys(productData).forEach((key) => {
         formData.append(key, productData[key]);
       });
-      const token = JSON.parse(localStorage.getItem("token"))
-      // Append image files
-      imageFiles.forEach(file => {
-        formData.append('images', file);
+  
+      // Append image files with correct field name
+      imageFiles.forEach((file, index) => {
+        formData.append(`images`, file); // Matches backend expectation
       });
+  
+      
   
       const response = await axios.post(
         `${PRODUCT_API_URL}/add-product`,
         formData,
         {
           headers: {
-            'Content-Type': 'multipart/form-data',
-            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         }
       );
-  
-      await fetchProducts();
-      setShowAddDialog(false);
+      await fetchProducts(); // Refresh products after addition
+      // Rest of your code remains the same
     } catch (error) {
-      console.error('Add Product Error:', error);
+      console.error("Add Product Error:", error.response?.data || error);
       setError(error.response?.data?.message || "Failed to add product");
     }
   };
@@ -183,48 +181,44 @@ export default function ProductsPage() {
   const ProductForm = ({ product, onSubmit, onClose, isNew = false }) => {
     const [imageFiles, setImageFiles] = useState([]);
     const [imagePreview, setImagePreview] = useState(product.images || []);
-  
+
     const handleImageChange = (e) => {
       const files = Array.from(e.target.files);
-      setImageFiles(prevFiles => [...prevFiles, ...files]);
-  
-      const previews = files.map(file => URL.createObjectURL(file));
-      setImagePreview(prev => [...prev, ...previews]);
+      setImageFiles((prevFiles) => [...prevFiles, ...files]);
+
+      const previews = files.map((file) => URL.createObjectURL(file));
+      setImagePreview((prev) => [...prev, ...previews]);
     };
-  
+
     const removeImage = (index) => {
       const newFiles = [...imageFiles];
       newFiles.splice(index, 1);
       setImageFiles(newFiles);
-  
+
       const newPreviews = [...imagePreview];
       newPreviews.splice(index, 1);
       setImagePreview(newPreviews);
     };
-  
+
     const handleSubmit = (e) => {
       e.preventDefault();
       const formData = new FormData(e.target);
       const data = Object.fromEntries(formData.entries());
-  
+    
       const processedData = {
+        _id:product._id,
         ...data,
+        seller: userId, // Add this line to include seller
         basePrice: Number(data.basePrice) || 0,
         quantity: Number(data.quantity) || 0,
         upForAuction: data.upForAuction === "true",
         harvestDate: data.harvestDate ? new Date(data.harvestDate) : null,
         expiryDate: data.expiryDate ? new Date(data.expiryDate) : null,
-        bidEndTime: data.upForAuction === "true" && data.bidEndTime
-          ? new Date(data.bidEndTime)
-          : null,
+        bidEndTime: data.upForAuction === "true" && data.bidEndTime ? new Date(data.bidEndTime) : null,
         status: data.status || "draft",
       };
-  
-      const finalData = isNew
-        ? processedData
-        : { ...processedData, _id: product._id };
-  
-      onSubmit(finalData, imageFiles);
+    
+      onSubmit(processedData, imageFiles);
     };
 
     return (
@@ -468,35 +462,35 @@ export default function ProductsPage() {
 
             {/* Images Card */}
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <h3 className="text-lg font-semibold mb-4">Images</h3>
-            <div className="grid gap-4">
-              <input
-                type="file"
-                multiple
-                accept="image/*"
-                onChange={handleImageChange}
-                className="mb-4"
-              />
-              <div className="grid grid-cols-4 gap-4">
-                {imagePreview.map((preview, index) => (
-                  <div key={index} className="relative">
-                    <img 
-                      src={preview} 
-                      alt={`Preview ${index}`} 
-                      className="w-full h-24 object-cover rounded"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeImage(index)}
-                      className="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-full"
-                    >
-                      X
-                    </button>
-                  </div>
-                ))}
+              <h3 className="text-lg font-semibold mb-4">Images</h3>
+              <div className="grid gap-4">
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="mb-4"
+                />
+                <div className="grid grid-cols-4 gap-4">
+                  {imagePreview.map((preview, index) => (
+                    <div key={index} className="relative">
+                      <img
+                        src={preview}
+                        alt={`Preview ${index}`}
+                        className="w-full h-24 object-cover rounded"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(index)}
+                        className="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-full"
+                      >
+                        X
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
 
             <div className="flex justify-end gap-4 pt-4">
               <Button
@@ -557,7 +551,6 @@ export default function ProductsPage() {
       });
     };
 
-    console.log("This is product:",product);
     
 
     return (
@@ -753,10 +746,9 @@ export default function ProductsPage() {
         {/* Header Section */}
         <div className="flex justify-between items-center bg-white rounded-xl p-6 shadow-sm">
           <div>
-          <h1 className="text-4xl py-2 font-bold bg-gradient-to-r from-green-400 via-green-600 to-blue-900 bg-clip-text text-transparent">
-  Empowering Growth: Manage Your Agricultural Products with Ease
-</h1>
-
+            <h1 className="text-4xl py-2 font-bold bg-gradient-to-r from-green-400 via-green-600 to-blue-900 bg-clip-text text-transparent">
+              Empowering Growth: Manage Your Agricultural Products with Ease
+            </h1>
 
             <p className="text-gray-600 mt-1">
               Manage your product inventory efficiently

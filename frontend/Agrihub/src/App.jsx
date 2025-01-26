@@ -6,21 +6,18 @@ import VerifyEmail from './pages/verify-email/VerifyEmail';
 import Navbar from './Component/Firstpage/Navbar/Navbar';
 import LoginPage from './pages/login/Login';
 import ForgotPasswordPage from './pages/forgetPassword/ForgetPassword';
-import Dashboard from "./pages/dashboard/Dashboard"
+import Dashboard from "./pages/dashboard/Dashboard";
 import AccountInformation from './Component/dashboard/AccountInformation';
-import AllBids from './Component/dashboard/AllBids';
+import AllAuctions from './Component/dashboard/AllAuctions';
 import MyOrders from './Component/dashboard/MyOrder';
 import ProductsPage from './Component/dashboard/ProductList';
-//import DeleteAccount from "./Component/dashboard/DeleteAccount"
+import ProductList from './Component/BuyerDashboard/ProductList';
+import BuyerDashboard from './pages/dashboard/BuyerDashboars';
 import { useSelector } from 'react-redux';
 
-
-// ProtectedRoute Component
 const ProtectedRoute = ({ element }) => {
   const isLoggedIn = useSelector((state) => state.user.isLoggedIn);
-
-  // If logged in, render the element; otherwise, redirect to login page
-  return isLoggedIn ? element : <Navigate to="/login"  />;
+  return isLoggedIn ? element : <Navigate to="/login" />;
 };
 
 function App() {
@@ -39,21 +36,21 @@ function App() {
           {/* Protected Routes */}
           <Route
             path="/dashboard/*"
-            element={
-              <ProtectedRoute
-                element={
-                  <Dashboard />
-                }
-              />
-            }
+            element={<ProtectedRoute element={<Dashboard />} />}
           >
-            {/* Dashboard Nested Routes */}
             <Route index element={<Navigate to="account" replace />} />
-            <Route path="account" element={<AccountInformation/>} />
+            <Route path="account" element={<AccountInformation />} />
             <Route path="orders" element={<MyOrders />} />
-            <Route path="products" element={<ProductsPage/>} />
-            <Route path="bids" element={<AllBids />} />
-            
+            <Route path="products" element={<ProductsPage />} />
+            <Route path="auctions" element={<AllAuctions />} />
+          </Route>
+
+          {/* Buyer Dashboard Route */}
+          <Route
+            path="/buyer-dashboard/*"
+            element={<ProtectedRoute element={<BuyerDashboard />} />}
+          >
+            <Route path="products" element={<ProductList />} />
           </Route>
         </Routes>
       </Router>

@@ -1,26 +1,30 @@
-import express from "express"
-import { protect, verifyToken } from "../middleware/verifyToken.js"
+import express from "express";
+import multer from "multer";
+import { storage } from "../CloudinaryConfig.js"; // Import Cloudinary storage
+import { protect, verifyToken } from "../middleware/verifyToken.js"; // Middleware for authentication
+import { 
+  addProductController, 
+  deleteProductController, 
+  getUserProductsController, 
+  getAllProductsController,
+  updateProductController 
+} from "../controller/productController.js";
 
-import { addProductController, deleteProductController, getUserProductsController, updateProductController } from "../controller/productController.js"
+const router = express.Router();
+const upload = multer({ storage }); // Configure multer with Cloudinary storage
 
-const router = express.Router()
+// Route to add a product (with multiple image uploads)
+router.post("/add-product", upload.array('images', 5), addProductController);
 
-router.post("/add-product",addProductController)
+// Route to update a product (with multiple image uploads)
+router.put("/update-product/:id", upload.array('images', 5), updateProductController);
 
-router.get("/get-all-products/:userId",verifyToken,getUserProductsController)
+// Get all products for a specific user
+router.get("/get-all-products/:userId", verifyToken, getUserProductsController);
 
-router.put("/update-product/:id",updateProductController)
+// Delete a product
+router.delete("/delete-product/:id",  deleteProductController);
 
-router.delete("/delete-product/:id",deleteProductController)
+router.get("/get-all-products",  getAllProductsController);
 
-
-
-
-
-
-
-
-
-
-
-export default router
+export default router;

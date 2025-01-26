@@ -1,130 +1,68 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { 
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "../ui/table";
-import { Badge } from "../ui/Badge";
-import { Package, ChevronDown, ChevronRight } from 'lucide-react';
+import { useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { fetchOrders, updateOrderStatus,fetchFarmerOrders } from "../../../slices/orderSlice";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/Table";
+import { Button } from "../ui/Button";
 
 const MyOrders = () => {
-  const [expandedOrder, setExpandedOrder] = useState(null);
+  const dispatch = useDispatch();
+  const { orders, loading, error } = useSelector((state) => state.orders);
 
-  // Sample orders data
-  const orders = [
-    {
-      id: 'ORD001',
-      date: '2025-01-15',
-      farmer: 'Sam Smith',
-      items: [
-        { name: 'Wheat', quantity: '100kg', price: '$200' },
-        { name: 'Rice', quantity: '50kg', price: '$150' }
-      ],
-      total: '$350',
-      status: 'Completed'
-    },
-    {
-      id: 'ORD002',
-      date: '2025-01-16',
-      farmer: 'Jane Doe',
-      items: [
-        { name: 'Corn', quantity: '75kg', price: '$180' }
-      ],
-      total: '$180',
-      status: 'In Transit'
-    }
-  ];
+  useEffect(() => {
+    dispatch(fetchFarmerOrders()); // Add status as an argument if filtering orders by status is required
+  }, [dispatch]);
 
-  const getStatusBadge = (status) => {
-    const styles = {
-      'Completed': 'bg-green-100 text-green-800',
-      'In Transit': 'bg-blue-100 text-blue-800',
-      'Pending': 'bg-yellow-100 text-yellow-800',
-      'Cancelled': 'bg-red-100 text-red-800'
-    };
-
-    return (
-      <Badge className={styles[status] || 'bg-gray-100 text-gray-800'}>
-        {status}
-      </Badge>
-    );
+  const handleStatusChange = (orderId, status) => {
+    dispatch(updateOrderStatus({ orderId, status }))
+      .unwrap()
+      .then(() => alert(`Order status updated to ${status}`))
+      .catch((err) => alert(`Error: ${err}`));
   };
 
+  if (loading) return <div>Loading orders...</div>;
+  if (error) return <div className="text-red-500">Error: {error}</div>;
+
   return (
-    <div className="p-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Package className="w-6 h-6" />
-            <span>My Orders</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-8"></TableHead>
-                <TableHead>Order ID</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Farmer</TableHead>
-                <TableHead>Total</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {orders.map((order) => (
-                <React.Fragment key={order.id}>
-                  <TableRow className="cursor-pointer hover:bg-gray-50"
-                    onClick={() => setExpandedOrder(expandedOrder === order.id ? null : order.id)}>
-                    <TableCell>
-                      {expandedOrder === order.id ? 
-                        <ChevronDown className="w-4 h-4" /> : 
-                        <ChevronRight className="w-4 h-4" />
-                      }
-                    </TableCell>
-                    <TableCell className="font-medium">{order.id}</TableCell>
-                    <TableCell>{order.date}</TableCell>
-                    <TableCell>{order.farmer}</TableCell>
-                    <TableCell>{order.total}</TableCell>
-                    <TableCell>{getStatusBadge(order.status)}</TableCell>
-                  </TableRow>
-                  {expandedOrder === order.id && (
-                    <TableRow>
-                      <TableCell colSpan={6}>
-                        <div className="p-4 bg-gray-50">
-                          <h4 className="font-medium mb-2">Order Items</h4>
-                          <Table>
-                            <TableHeader>
-                              <TableRow>
-                                <TableHead>Item</TableHead>
-                                <TableHead>Quantity</TableHead>
-                                <TableHead>Price</TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {order.items.map((item, index) => (
-                                <TableRow key={index}>
-                                  <TableCell>{item.name}</TableCell>
-                                  <TableCell>{item.quantity}</TableCell>
-                                  <TableCell>{item.price}</TableCell>
-                                </TableRow>
-                              ))}
-                            </TableBody>
-                          </Table>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </React.Fragment>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+    <div className="p-4">
+      <h1 className="text-xl font-bold mb-4">Farmer Orders</h1>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Order ID</TableHead>
+            <TableHead>Winner</TableHead>
+            <TableHead>Product</TableHead>
+            <TableHead>Amount</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {orders.map((order) => (
+            <TableRow key={order._id}>
+              <TableCell>{order._id}</TableCell>
+              <TableCell>{order.winnerId?.name || "N/A"}</TableCell>
+              <TableCell>{order.productId?.name || "N/A"}</TableCell>
+              <TableCell>${order.amount.toFixed(2)}</TableCell>
+              <TableCell>{order.status}</TableCell>
+              <TableCell>
+                <Button
+                  size="sm"
+                  onClick={() => handleStatusChange(order._id, "completed")}
+                >
+                  Mark as Completed
+                </Button>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => handleStatusChange(order._id, "cancelled")}
+                >
+                  Cancel Order
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   );
 };

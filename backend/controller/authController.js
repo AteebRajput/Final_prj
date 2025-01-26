@@ -1,4 +1,4 @@
-import { User } from "../models/userModel.js";
+import  User  from "../models/userModel.js";
 import bcrypt from "bcryptjs";
 import { generateTokenAndSetCookie } from "../utils/generateTokenAndSetCookie.js";
 import jwt from "jsonwebtoken";
@@ -305,67 +305,35 @@ export const verifyEmail = async (req, res) => {
 };
 export const loginController = async (req, res) => {
   try {
-      const { email, password } = req.body;
+    const { email, password } = req.body;
 
-      // Input validation
-      if (!email || !password) {
-          return res.status(400).json({
-              success: false,
-              message: "Please provide both email and password"
-          });
-      }
+    if (!email || !password) {
+      return res.status(400).json({ success: false, message: "Please provide both email and password" });
+    }
 
-      // Find user and check if email is verified
-      const user = await User.findOne({ email });
-      if (!user) {
-          return res.status(401).json({
-              success: false,
-              message: "Invalid credentials"
-          });
-      }
+    const user = await User.findOne({ email });
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      return res.status(401).json({ success: false, message: "Invalid credentials" });
+    }
 
-      // Check if email is verified
-      if (!user.isVerified) {
-          return res.status(401).json({
-              success: false,
-              message: "Please verify your email before logging in"
-          });
-      }
+    if (!user.isVerified) {
+      return res.status(401).json({ success: false, message: "Please verify your email before logging in" });
+    }
 
-      // Verify password
-      const isPasswordValid = await bcrypt.compare(password, user.password);
-      if (!isPasswordValid) {
-          return res.status(401).json({
-              success: false,
-              message: "Invalid credentials"
-          });
-      }
+    const token = generateTokenAndSetCookie(res, user._id);
 
-      // Generate token and update last login
-      const token = generateTokenAndSetCookie(res, user._id);  // Make sure to return token here
-      user.lastLogin = Date.now();
-      await user.save();
-      console.log("Token is:",token);
-      
-      // Remove sensitive data before sending response
-      const userResponse = user.toObject();
-      delete userResponse.password;
-      delete userResponse.verificationToken;
-      delete userResponse.verificationTokenExpireAt;
-
-      res.status(200).json({
-          success: true,
-          message: "Login successful",
-          user: userResponse,
-          token  // <-- Add the token here in the response
-      });
-
+    res.status(200).json({
+      success: true,
+      message: "Login successful",
+      user: {
+        ...user.toObject(),
+        role: user.role, // Include role (e.g., 'Buyer', 'Seller', 'Both')
+      },
+      token,
+    });
   } catch (error) {
-      console.error("Login error:", error);
-      res.status(500).json({
-          success: false,
-          message: "An error occurred during login"
-      });
+    console.error("Login error:", error);
+    res.status(500).json({ success: false, message: "An error occurred during login" });
   }
 };
 

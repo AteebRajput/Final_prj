@@ -10,24 +10,29 @@ import { useDispatch, useSelector } from "react-redux";
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState(""); // Role selection state
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const { loading, error, user } = useSelector((state) => state.user);
 
-  // Redirect to dashboard on successful login
+  // Redirect to appropriate dashboard based on role
   useEffect(() => {
     if (user) {
-      console.log("User logged in:", user);
-      navigate("/dashboard"); // Adjust this path to match your app's routing
+      if (user.role === "buyer") {
+        navigate("/buyer-dashboard");
+      } else if (user.role === "seller" || user.role === "both") {
+        navigate("/dashboard");
+      }
     }
   }, [user, navigate]);
+  
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    if (!email || !password) {
-      alert("Please fill in all fields");
+    if (!email || !password || !role) {
+      alert("Please fill in all fields, including role selection");
       return;
     }
 
@@ -69,6 +74,22 @@ const LoginPage = () => {
               onChange={(e) => setPassword(e.target.value)}
             />
 
+            {/* Role Selection Dropdown */}
+            <div className="mb-4">
+              <select
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-700 rounded-lg bg-gray-900 text-white"
+              >
+                <option value="" disabled>
+                  Select Role
+                </option>
+                <option value="Buyer">Buyer</option>
+                <option value="Seller">Seller</option>
+                <option value="Both">Both</option>
+              </select>
+            </div>
+
             <div className="flex items-center mb-6">
               <Link to="/forgot-password" className="text-sm text-green-400 hover:underline">
                 Forgot password?
@@ -86,9 +107,9 @@ const LoginPage = () => {
               whileTap={{ scale: 0.98 }}
               className="w-full py-3 px-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-lg shadow-lg hover:from-green-600 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-900 transition duration-200"
               type="submit"
-              disabled={loading || !email || !password} // Disable button when loading or fields are empty
+              disabled={loading || !email || !password || !role} // Disable button if fields are empty
             >
-              {loading ? "Logging in..." : "Log In"} {/* Show loading text */}
+              {loading ? "Logging in..." : "Log In"}
             </motion.button>
           </form>
         </div>

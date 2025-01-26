@@ -4,28 +4,26 @@ import { createAuctionController } from "./auctionController.js"; // Import your
 
 import Auction from "../models/auctionModel.js";
 
-
 export const addProductController = async (req, res) => {
   try {
     const {
       name,
       description,
       category,
-      seller,
-      
       basePrice,
       quantity,
       unit,
       quality,
+      location,
       harvestDate,
       expiryDate,
-      location,
       status,
-      bidEndTime,
       upForAuction,
+      bidEndTime,
+      seller,
     } = req.body;
 
-    const images = req.files ? req.files.map(file => file.path) : [];
+    const images = req.files ? req.files.map((file) => file.path) : [];
 
     // Validation
     if (
@@ -42,7 +40,6 @@ export const addProductController = async (req, res) => {
       !harvestDate ||
       !expiryDate ||
       !status
-
     ) {
       return res.status(400).json({ error: "All fields are required" });
     }
@@ -55,8 +52,13 @@ export const addProductController = async (req, res) => {
       return res.status(400).json({ error: "Quantity must be a positive number" });
     }
 
-    console.log("product is: ",);
-    
+    // Parse dates
+    const parsedHarvestDate = new Date(harvestDate);
+    const parsedExpiryDate = new Date(expiryDate);
+    if (upForAuction === "true") {
+      var parsedBidEndTime = new Date(bidEndTime);
+    }
+
     // Create product
     const product = new Product({
       name,
@@ -69,33 +71,25 @@ export const addProductController = async (req, res) => {
       unit,
       quality,
       location,
-      harvestDate: new Date(harvestDate),
-      expiryDate: new Date(expiryDate),
+      harvestDate: parsedHarvestDate,
+      expiryDate: parsedExpiryDate,
       status,
-      upForAuction,
-      bidEndTime: upForAuction && bidEndTime ? new Date(bidEndTime) : null,
+      upForAuction: upForAuction === "true",
+      bidEndTime: parsedBidEndTime,
     });
-    
 
     await product.save();
 
-    // Handle auction creation if the product is marked for auction
-    if (upForAuction) {
-      if (!bidDuration || !["hours", "days"].includes(bidDuration.unit) || isNaN(bidDuration.value) || bidDuration.value <= 0) {
-        return res.status(400).json({ error: "Invalid bid duration for auction" });
-      }
+    let auction = null;
 
-      const currentTime = new Date();
-      const endTime =
-        bidDuration.unit === "hours"
-          ? new Date(currentTime.getTime() + bidDuration.value * 60 * 60 * 1000) // Add hours
-          : new Date(currentTime.getTime() + bidDuration.value * 24 * 60 * 60 * 1000); // Add days
-
-      const auction = new Auction({
+    // Create auction if required
+    if (upForAuction === "true") {
+      auction = new Auction({
         productId: product._id,
         ownerId: seller,
-        basePrice,
-        endTime,
+        basePrice: Number(basePrice),
+        endTime: parsedBidEndTime,
+        status: "active",
       });
 
       await auction.save();
@@ -104,7 +98,7 @@ export const addProductController = async (req, res) => {
     res.status(201).json({
       message: "Product added successfully",
       product,
-      ...(upForAuction && { auction: "Auction created successfully" }), // Include auction message if applicable
+      ...(auction && { auction }),
     });
   } catch (error) {
     console.error("Error adding product:", error);
@@ -148,87 +142,48 @@ export const getUserProductsController = async (req, res) => {
 // Update product by ID
 export const updateProductController = async (req, res) => {
   try {
-    const { id } = req.params; // Get product ID from request params
-    const updatedData = req.body; // Get the updated data from request body
+    const { id } = req.params;
+    const updatedData = req.body;
 
-    console.log("Id is this: ",id);
+    console.log("Product data to be updated: ", updatedData);
     
-    // Check if the product ID exists in the request
-    if (!id) {
-      return res.status(400).json({ error: "Product ID is required" });
-    }
+    // Prepare data for update
+    const dataToUpdate = {
+      name: updatedData.name,
+      description: updatedData.description,
+      category: updatedData.category,
+      basePrice: Number(updatedData.basePrice),
+      quantity: Number(updatedData.quantity),
+      unit: updatedData.unit,
+      quality: updatedData.quality,
+      location: updatedData.location,
+      harvestDate: new Date(updatedData.harvestDate),
+      expiryDate: new Date(updatedData.expiryDate),
+      status: updatedData.status,
+      upForAuction: updatedData.upForAuction,
+      bidEndTime: updatedData.upForAuction ? new Date(updatedData.bidEndTime) : null,
+      seller: updatedData.seller
+    };
 
-        // Handle image uploads
-        if (req.files && req.files.length > 0) {
-          const newImageUrls = req.files.map(file => file.path);
-          updatedData.images = newImageUrls;
-        }
-    
+    const product = await Product.findByIdAndUpdate(id, dataToUpdate, { 
+      new: true,
+      runValidators: true 
+    });
 
-    // Validate fields (optional: customize based on requirements)
-    const requiredFields = [
-      "name",
-      "description",
-      "category",
-      "seller",
-      "images",
-      "basePrice",
-      "quantity",
-      "unit",
-      "quality",
-      "harvestDate",
-      "expiryDate",
-      "location",
-      "status",
-    ];
-    for (const field of requiredFields) {
-      if (field in updatedData && !updatedData[field]) {
-        return res.status(400).json({ error: `${field} cannot be empty` });
-      }
-    }
-
-    // Validate basePrice and quantity if provided
-    if ("basePrice" in updatedData && (isNaN(updatedData.basePrice) || updatedData.basePrice <= 0)) {
-      return res.status(400).json({ error: "Base price must be a positive number" });
-    }
-    if ("quantity" in updatedData && (isNaN(updatedData.quantity) || updatedData.quantity <= 0)) {
-      return res.status(400).json({ error: "Quantity must be a positive number" });
-    }
-
-    // Handle bid duration update (optional)
-    if (updatedData.bidDuration) {
-      const { unit, value } = updatedData.bidDuration;
-      if (!["hours", "days"].includes(unit) || isNaN(value) || value <= 0) {
-        return res.status(400).json({ error: "Invalid bid duration" });
-      }
-      const currentTime = new Date();
-      if (unit === "hours") {
-        updatedData.bidEndTime = new Date(currentTime.getTime() + value * 60 * 60 * 1000);
-      } else if (unit === "days") {
-        updatedData.bidEndTime = new Date(currentTime.getTime() + value * 24 * 60 * 60 * 1000);
-      }
-    }
-
-    // Update the product
-    const product = await Product.findByIdAndUpdate(id, updatedData, { new: true });
-
-    // Check if product exists
     if (!product) {
       return res.status(404).json({ error: "Product not found" });
     }
 
-    // Respond with the updated product
     res.status(200).json({
       message: "Product updated successfully",
       product,
     });
   } catch (error) {
-    console.error("Error updating product:", error);
-
-    // Return server error response
+    console.error("Detailed update error:", error);
     res.status(500).json({
-      message: "Failed to update product due to a server error",
-      error: error.message,
+      message: "Failed to update product",
+      errorMessage: error.message,
+      errorStack: error.stack
     });
   }
 };
@@ -269,7 +224,37 @@ export const deleteProductController = async (req, res) => {
 };
 
 
+// Get all active products
+export const getAllProductsController = async (req, res) => {
+  try {
+    // Fetch all active products
+    const products = await Product.find({ 
+      status: 'active',
+      // Optionally add more filters like not expired
+      expiryDate: { $gt: new Date() }
+    });
 
+    if (!products || products.length === 0) {
+      return res.status(200).json({
+        message: "No active products found",
+        products: [],
+        totalProducts: 0
+      });
+    }
+
+    res.status(200).json({
+      message: "Products fetched successfully",
+      products,
+      totalProducts: products.length
+    });
+  } catch (error) {
+    console.error("Error fetching all products:", error);
+    res.status(500).json({
+      message: "Failed to fetch products",
+      error: error.message
+    });
+  }
+};
 
 
 

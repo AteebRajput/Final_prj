@@ -261,7 +261,7 @@ function Signup() {
                 onChange={handleChange}
               >
                 <option value="EN">English (EN)</option>
-                <option value="ES">Spanish (ES)</option>
+                <option value="ES">Urdu (UR)</option>
               </select>
             </div>
             {/* Right Column */}

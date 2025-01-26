@@ -13,7 +13,10 @@ export const placeBidController = async (req, res) => {
     if (!auction) return res.status(404).json({ error: "Auction not found" });
 
     if (auction.status !== "active") return res.status(400).json({ error: "Auction is not active" });
-
+    
+    if (bidAmount <= auction.basePrice) {
+      return res.status(400).json({ error: "Bid amount must be higher than the current base price" });
+    }
     if (bidAmount <= auction.highestBid.amount) {
       return res.status(400).json({ error: "Bid amount must be higher than the current highest bid" });
     }

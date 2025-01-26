@@ -4,6 +4,26 @@ import axios from "axios";
 
 const PRODUCT_API_URL = "http://localhost:5000/api/product";
 
+export const fetchAllTheProducts = createAsyncThunk(
+  "products/fetchAllProducts",
+  async (_, { rejectWithValue }) => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const response = await axios.get(`${PRODUCT_API_URL}/get-all-products`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        withCredentials: true,
+      });
+
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || "Failed to fetch products");
+    }
+  }
+);
+
 export const fetchAllProducts = createAsyncThunk(
   "products/fetchAllProducts",
   async (userId, { rejectWithValue }) => {

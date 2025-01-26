@@ -1,4 +1,4 @@
-// Instead of require, use import
+
 import safeBuffer from 'safe-buffer';
 import express from "express";
 import dotenv from "dotenv";
@@ -9,9 +9,8 @@ import authRoute from "./routes/authRoute.js";
 import productRouter from "./routes/productRoute.js";
 import auctionRouter from "./routes/auctionRouter.js";
 import bidRouter from "./routes/bidRoute.js";
+import orderRouter from "./routes/orderRoutes.js"
 
-// Rest of your code remains the same
-// Rest of your code remains the same
 
 // load enviroment variable
 dotenv.config();
@@ -40,6 +39,7 @@ app.use("/api/auth", authRoute);
 app.use("/api/product", productRouter);
 app.use("/api/auction", auctionRouter);
 app.use("/api/bid", bidRouter);
+app.use("/api/order", orderRouter);
 
 app.get("/", (req, res) => {
   res.send("Hello world");

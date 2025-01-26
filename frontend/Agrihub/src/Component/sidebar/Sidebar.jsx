@@ -2,12 +2,12 @@ import React from "react";
 import { Store, ShoppingCart, FileText, Gavel, UserX, User } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
-const BuyerSidebar = () => {
+const FarmerSidebar = () => {
   const menuItems = [
     { icon: User, label: "Account Information", path: "/dashboard/account" },
     { icon: ShoppingCart, label: "My Orders", path: "/dashboard/orders" },
     { icon: Store, label: "Product List", path: "/dashboard/products" },
-    { icon: Gavel, label: "All Bids", path: "/dashboard/bids" },
+    { icon: Gavel, label: "All Bids", path: "/dashboard/auctions" },
     { icon: UserX, label: "Delete Account", path: "/dashboard/delete-account" },
   ];
 
@@ -55,4 +55,4 @@ const BuyerSidebar = () => {
   );
 };
 
-export default BuyerSidebar;
+export default FarmerSidebar;
