@@ -1,7 +1,18 @@
 import { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { fetchOrders, updateOrderStatus,fetchFarmerOrders } from "../../../slices/orderSlice";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/Table";
+import {
+  
+  updateOrderStatus,
+  fetchFarmerOrders,
+} from "../../../slices/orderSlice";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../ui/Table";
 import { Button } from "../ui/Button";
 
 const MyOrders = () => {
@@ -40,9 +51,9 @@ const MyOrders = () => {
           {orders.map((order) => (
             <TableRow key={order._id}>
               <TableCell>{order._id}</TableCell>
-              <TableCell>{order.winnerId?.name || "N/A"}</TableCell>
+              <TableCell>{order.buyerId?.name || "N/A"}</TableCell>
               <TableCell>{order.productId?.name || "N/A"}</TableCell>
-              <TableCell>${order.amount.toFixed(2)}</TableCell>
+              <TableCell>${order.unitPrice.toFixed(2)}</TableCell>
               <TableCell>{order.status}</TableCell>
               <TableCell>
                 <Button

@@ -94,7 +94,7 @@ export const getAuctionBidsController = async (req, res) => {
 export const endAuctionController = async (req, res) => {
   try {
     const { auctionId } = req.params;
-    const { farmerId } = req.body; // Destructure farmerId
+    const { farmerId } = req.body;
 
     const auction = await Auction.findOne({ 
       _id: auctionId, 
@@ -103,28 +103,74 @@ export const endAuctionController = async (req, res) => {
     });
 
     if (!auction) {
-      return res.status(404).json({ error: "Active auction not found or you're not authorized to end this auction." });
+      return res.status(404).json({ error: "Active auction not found" });
     }
 
-    if (!auction.highestBid) {
-      return res.status(400).json({ error: "No bids placed on this auction." });
+    // Automatically end auction if time has passed
+    if (new Date() > auction.endTime) {
+      auction.status = "ended";
+      
+      if (auction.highestBid) {
+        // Create an order for the winning bid
+        const order = new Order({
+          productId: auction.productId,
+          buyerId: auction.highestBid.bidder,
+          sellerId: auction.ownerId,
+          amount: auction.highestBid.amount,
+          status: 'completed'
+        });
+
+        await order.save();
+        
+        // Optional: Remove product from active listings
+        await Product.findByIdAndUpdate(auction.productId, { 
+          status: 'sold', 
+          upForAuction: false 
+        });
+      }
+
+      await auction.save();
+
+      return res.status(200).json({ 
+        message: "Auction ended successfully", 
+        winner: auction.highestBid?.bidder || null 
+      });
     }
 
-    // Determine the winner
-    auction.status = "ended";
-    const winner = auction.highestBid.bidder;
-
-    await auction.save();
-
-    // Optional: Notify participants (e.g., using Socket.IO or email)
-    // sendNotification(auction.participants, `Auction ${auctionId} has ended. Winner: ${winner}`)
-
-    res.status(200).json({ 
-      message: "Auction ended successfully", 
-      winner: winner 
-    });
+    return res.status(400).json({ error: "Auction time has not yet ended" });
   } catch (error) {
     console.error("Error ending auction:", error);
     res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// Fetch auction details for a specific product
+export const getAuctionDetails = async (req, res) => {
+  const { productId } = req.params;
+  
+  try {
+    const auction = await Auction.findOne({ "productId":productId }).populate('highestBid.bidder bidders.bidder'); // Populate bidder data
+
+    if (!auction) {
+      return res.status(404).json({ message: 'Auction not found or auction has ended.' });
+    }
+
+    // Calculate highest bid (if any)
+    const highestBid = auction.highestBid.amount;
+
+    // Calculate total bidders (length of bidders array)
+    const totalBidders = auction.bidders.length;
+
+    // Calculate remaining time
+    const remainingTime = new Date(auction.endTime) - new Date();
+    const formattedRemainingTime = remainingTime > 0 ? remainingTime : 0; // Remaining time in milliseconds
+
+    res.json({
+      highestBid,
+      totalBidders,
+      remainingTime: formattedRemainingTime, // Return remaining time in ms
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching auction details.', error: error.message });
   }
 };

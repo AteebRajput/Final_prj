@@ -1,11 +1,19 @@
 import express from "express";
-import { createOrderController, updateOrderStatusController,fetchFarmerOrdersController } from "../controller/orderController.js";
+import {
+  createOrderController,
+  placeOrderController,
+  updateOrderStatusController,
+  fetchFarmerOrdersController,
+  fetchUserOrder
+} from "../controller/orderController.js";
 
 const router = express.Router();
 
 router.post("/create", createOrderController);
+router.post("/place-order", placeOrderController);
 router.put("/:orderId/status", updateOrderStatusController);
 // Fetch orders for a specific farmer
-router.get('/get-orders/:farmerId', fetchFarmerOrdersController);
-
+router.get("/get-orders/:farmerId", fetchFarmerOrdersController);
+router.get("/get-user-orders/:userId", fetchUserOrder);
+// router.get("")
 export default router;

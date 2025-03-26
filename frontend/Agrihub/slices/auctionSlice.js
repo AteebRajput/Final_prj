@@ -2,6 +2,8 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
 const AUCTION_api = "http://localhost:5000/api/auction"
+const BID_API = "http://localhost:5000/api/bid"
+const ORDER_API = "http://localhost:5000/api/order"
 
 // Async thunk to fetch auctions
 
@@ -38,22 +40,59 @@ export const fetchAuctions = createAsyncThunk('auctions/fetchAuctions', async (_
     }
   );
   
-  
-  
-
-// Async thunk to end an auction
-export const endAuction = createAsyncThunk(
-  "auctions/endAuction",
-  async (auctionId, { rejectWithValue }) => {
-    const userId = JSON.parse(localStorage.getItem("userId")).userId;
+  // In auctionSlice.js
+export const placeBid = createAsyncThunk(
+  'auctions/placeBid',
+  async (bidData, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${AUCTION_api}/${auctionId}/end`, { farmerId: userId });
-      return { auctionId, winner: response.data.winner };
+      console.log("Bid data:",bidData);
+      
+      const response = await axios.post(`${BID_API}/place-bid`, bidData);
+      return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data || { message: "An unknown error occurred" });
+      return rejectWithValue(error.response.data);
     }
   }
 );
+
+export const endAuction = createAsyncThunk(
+  'auctions/endAuction',
+  async ({ auctionId, farmerId }, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`/api/auctions/${auctionId}/end`, { farmerId });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+  
+// Place Bid Async Thunk
+// export const placeBid = createAsyncThunk(
+//   "auction/placeBid",
+//   async (bidData, { rejectWithValue }) => {
+//     try {
+//       const response = await axios.post("/api/auction/place-bid", bidData);
+//       return response.data; // Assuming the response contains the updated auction info
+//     } catch (error) {
+//       return rejectWithValue(error.response.data);
+//     }
+//   }
+// );
+
+export const fetchAuctionDetails = createAsyncThunk(
+  'auctions/fetchAuctionDetails',
+  async (productId) => {
+    const response = await fetch(`${AUCTION_api}/auction-details/${productId}`);
+    const data = await response.json();
+    return data;
+  }
+);
+
+
+
+
+
 
 const auctionSlice = createSlice({
   name: 'auctions',
@@ -112,6 +151,37 @@ const auctionSlice = createSlice({
       .addCase(fetchAuctionBids.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      .addCase(placeBid.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(placeBid.fulfilled, (state, action) => {
+        state.loading = false;
+        // Update auctions in the store with the new bid
+        const updatedAuction = action.payload.auction;
+        const auctionIndex = state.auctions.findIndex(
+          (auction) => auction._id === updatedAuction._id
+        );
+        if (auctionIndex !== -1) {
+          state.auctions[auctionIndex] = updatedAuction;
+        }
+      })
+      .addCase(placeBid.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+
+      .addCase(fetchAuctionDetails.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchAuctionDetails.fulfilled, (state, action) => {
+        state.loading = false;
+        state.auctionDetails = action.payload;
+      })
+      .addCase(fetchAuctionDetails.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message;
       });
     },
 });

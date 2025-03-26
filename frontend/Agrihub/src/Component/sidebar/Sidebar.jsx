@@ -40,7 +40,7 @@ const FarmerSidebar = () => {
                 to={item.path}
                 className={`w-full flex items-center px-4 py-3 rounded-lg text-sm ${
                   activePath === item.path
-                    ? "bg-blue-50 text-blue-700"
+                    ? "bg-green-50 text-green-700"
                     : "text-gray-700 hover:bg-gray-50"
                 }`}
               >

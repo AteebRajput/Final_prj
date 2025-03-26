@@ -61,31 +61,62 @@ function Signup() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+  
+    // Email validation regex
+    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+    if (!emailPattern.test(formData.email)) {
+      toast.error("Please enter a valid email address!");
+      return;
+    }
+  
+    // Pakistani phone number validation regex
+    const phonePattern = /^(?:\+92|0)(3\d{9})$/;
+    if (!phonePattern.test(formData.phone)) {
+      toast.error("Please enter a valid Pakistani phone number (e.g., +923001234567 or 03001234567)!");
+      return;
+    }
+  
+    // NIC (CNIC) validation - 13 digits without dashes
+    const nicPattern = /^\d{13}$/;
+    if (!nicPattern.test(formData.nic)) {
+      toast.error("Please enter a valid 13-digit NIC (without dashes)!");
+      return;
+    }
+  
+    // Postal code validation - must be numeric
+    if (!/^\d+$/.test(formData.postalCode)) {
+      toast.error("Postal Code must be numeric!");
+      return;
+    }
+  
+    // Password match validation
     if (formData.password !== formData.confirmPassword) {
       toast.error("Passwords do not match!");
       return;
     }
+  
+    // Terms & Conditions agreement validation
     if (!formData.termsAgreed) {
       toast.error("You must accept the terms and conditions!");
       return;
     }
-
+  
     // Combine firstName and lastName into a single 'name' field
     const updatedFormData = {
       ...formData,
-      name: `${formData.firstName} ${formData.lastName}`, // Combine first and last name
+      name: `${formData.firstName} ${formData.lastName}`,
     };
-
-    // Remove firstName and lastName from the final data being sent
+  
+    // Remove firstName, lastName, and confirmPassword from final data
     delete updatedFormData.firstName;
     delete updatedFormData.lastName;
     delete updatedFormData.confirmPassword;
-
+  
     dispatch(signupUser(updatedFormData));
-    console.log("Form Data Submitted:", updatedFormData);
     toast.success("Signup successful!");
-
-    // Reset form
+  
+    // Reset form after successful submission
     setFormData({
       role: "",
       firstName: "",
@@ -101,12 +132,14 @@ function Signup() {
       preferredProducts: [],
       otherProducts: "",
       email: "",
-      nic:"",
+      nic: "",
       password: "",
       confirmPassword: "",
       termsAgreed: false,
     });
   };
+
+  
 
   return (
     <div className="main-signup">

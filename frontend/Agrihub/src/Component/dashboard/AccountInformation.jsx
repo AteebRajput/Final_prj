@@ -95,7 +95,7 @@ const AccountInformation = () => {
     return (
       <div className="p-4 lg:p-8 max-w-7xl mx-auto flex justify-center items-center min-h-[400px]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading user information...</p>
         </div>
       </div>
@@ -123,7 +123,7 @@ const AccountInformation = () => {
   return (
     <div className="p-4 lg:p-8 max-w-7xl mx-auto">
       <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300">
-        <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-lg">
+        <CardHeader className="bg-gradient-to-r from-green-50 to-green-50 rounded-t-lg">
           <CardTitle className="flex items-center justify-between py-2">
             <span className="text-2xl font-bold text-gray-800">Account Information</span>
             <div className="space-x-3">
@@ -140,7 +140,7 @@ const AccountInformation = () => {
                 onClick={() => (isEditing ? handleSubmit() : setIsEditing(true))}
                 variant={isEditing ? "default" : "default"}
                 disabled={status === "loading"}
-                className="bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+                className="bg-green-600 hover:bg-green-700 text-white transition-colors"
               >
                 {status === "loading" ? "Saving..." : isEditing ? "Save Changes" : "Edit Profile"}
               </Button>

@@ -1,19 +1,26 @@
 import Auction from "../models/auctionModel.js";
-import  { Bid } from "../models/bidModel.js";
+import { Bid } from "../models/bidModel.js";
 
 export const placeBidController = async (req, res) => {
   try {
-    const { auctionId, bidderId, bidAmount } = req.body;
+    const { productId, bidderId, bidAmount } = req.body;
 
-    if (!auctionId || !bidderId || isNaN(bidAmount) || bidAmount <= 0) {
+    console.log("Bids are:", req.body);
+
+    if (!productId || !bidderId || isNaN(bidAmount) || bidAmount <= 0) {
       return res.status(400).json({ error: "Invalid input for bid" });
     }
 
-    const auction = await Auction.findById(auctionId).populate("highestBid.bidder").populate("bidders.bidder");
-    if (!auction) return res.status(404).json({ error: "Auction not found" });
+    // Find the auction based on the productId
+    const auction = await Auction.findOne({ productId }).populate("highestBid.bidder").populate("bidders.bidder");
+    if (!auction) return res.status(404).json({ error: "Auction not found for the provided product" });
 
-    if (auction.status !== "active") return res.status(400).json({ error: "Auction is not active" });
-    
+    // Check auction status
+    if (auction.status !== "active") {
+      return res.status(400).json({ error: "Auction is not active" });
+    }
+
+    // Validate bid amount
     if (bidAmount <= auction.basePrice) {
       return res.status(400).json({ error: "Bid amount must be higher than the current base price" });
     }
@@ -21,19 +28,20 @@ export const placeBidController = async (req, res) => {
       return res.status(400).json({ error: "Bid amount must be higher than the current highest bid" });
     }
 
-    // Update auction
+    // Update the auction with the new highest bid
     auction.highestBid = { bidder: bidderId, amount: bidAmount };
     auction.bidders.push({ bidder: bidderId, amount: bidAmount });
     await auction.save();
 
+    // Save the bid in the Bid model
     const bid = new Bid({
-        bidder: bidderId,
-        productId: auction.productId,
-        productOwnerId: auction.ownerId,
-        amount:bidAmount,
-    })
+      bidder: bidderId,
+      productId: auction.productId,
+      productOwnerId: auction.ownerId,
+      amount: bidAmount,
+    });
 
-    await bid.save()
+    await bid.save();
 
     // Notify owner and bidders (logic for notification should go here)
     console.log("Notify owner:", auction.ownerId);

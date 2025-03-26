@@ -1,19 +1,27 @@
-import './App.css';
-import MainPage from './Component/Firstpage/MainPage';
-import Signup from './pages/signup/signup';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import VerifyEmail from './pages/verify-email/VerifyEmail';
-import Navbar from './Component/Firstpage/Navbar/Navbar';
-import LoginPage from './pages/login/Login';
-import ForgotPasswordPage from './pages/forgetPassword/ForgetPassword';
+import "./App.css";
+import MainPage from "./Component/Firstpage/MainPage";
+import Signup from "./pages/signup/signup";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Navigate,
+} from "react-router-dom";
+import VerifyEmail from "./pages/verify-email/VerifyEmail";
+import Navbar from "./Component/Firstpage/Navbar/Navbar";
+import LoginPage from "./pages/login/Login";
+import ForgotPasswordPage from "./pages/forgetPassword/ForgetPassword";
 import Dashboard from "./pages/dashboard/Dashboard";
-import AccountInformation from './Component/dashboard/AccountInformation';
-import AllAuctions from './Component/dashboard/AllAuctions';
-import MyOrders from './Component/dashboard/MyOrder';
-import ProductsPage from './Component/dashboard/ProductList';
-import ProductList from './Component/BuyerDashboard/ProductList';
-import BuyerDashboard from './pages/dashboard/BuyerDashboars';
-import { useSelector } from 'react-redux';
+import AccountInformation from "./Component/dashboard/AccountInformation";
+import AllAuctions from "./Component/dashboard/AllAuctions";
+import MyOrders from "./Component/dashboard/MyOrder";
+import ProductsPage from "./Component/dashboard/ProductList";
+import ProductList from "./Component/BuyerDashboard/ProductList";
+import BuyerDashboard from "./pages/dashboard/BuyerDashboars";
+import BuyerOrder from "./Component/BuyerDashboard/BuyerOrder";
+import { useSelector } from "react-redux";
+import { ToastContainer } from "react-toastify"; // Import ToastContainer
+import "react-toastify/dist/ReactToastify.css"; // Import Toastify CSS
 
 const ProtectedRoute = ({ element }) => {
   const isLoggedIn = useSelector((state) => state.user.isLoggedIn);
@@ -25,6 +33,19 @@ function App() {
     <>
       <Router>
         <Navbar />
+        {/* Add ToastContainer at the root level */}
+        <ToastContainer
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+        />
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<MainPage />} />
@@ -51,6 +72,8 @@ function App() {
             element={<ProtectedRoute element={<BuyerDashboard />} />}
           >
             <Route path="products" element={<ProductList />} />
+            <Route path="account" element={<AccountInformation />} />
+            {/* <Route path="orders" element={<BuyerOrder />} /> */}
           </Route>
         </Routes>
       </Router>

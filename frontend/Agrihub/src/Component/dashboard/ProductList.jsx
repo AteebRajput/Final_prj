@@ -289,7 +289,7 @@ export default function ProductsPage() {
                 <div className="space-y-4">
                   <div className="grid gap-2">
                     <Label htmlFor="basePrice" className="text-gray-700">
-                      Base Price* (₹)
+                      Base Price* (₨)
                     </Label>
                     <Input
                       id="basePrice"
@@ -645,7 +645,7 @@ export default function ProductsPage() {
                         <span className="font-medium">Base Price</span>
                       </div>
                       <span className="text-lg font-bold text-primary">
-                        ₹{product.basePrice}
+                        ₨ {product.basePrice}
                       </span>
                     </div>
 
@@ -844,7 +844,7 @@ export default function ProductsPage() {
                       <div className="flex items-center gap-2">
                         <Scale className="w-4 h-4 text-primary" />
                         <span className="font-semibold">
-                          ₹{product.basePrice}
+                          ₨{product.basePrice}
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
@@ -863,7 +863,7 @@ export default function ProductsPage() {
                         setSelectedProduct(product);
                         setShowDetailDialog(true);
                       }}
-                      className="hover:bg-primary hover:text-white transition-colors duration-300"
+                      className="hover:bg-primary hover:text-green hover:bg-green-500 transition-colors duration-300"
                     >
                       <Eye className="w-4 h-4 mr-2" /> View
                     </Button>

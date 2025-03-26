@@ -4,11 +4,27 @@ import { Link, useLocation } from "react-router-dom";
 
 const BuyerSidebar = () => {
   const menuItems = [
-    { icon: User, label: "Account Information", path: "/buyer-dashboard/account" },
+    {
+      icon: User,
+      label: "Account Information",
+      path: "/buyer-dashboard/account",
+    },
     { icon: ShoppingCart, label: "My Orders", path: "/buyer-dashboard/orders" },
-    { icon: FileText, label: "Browse Products", path: "/buyer-dashboard/products" },
-    { icon: CreditCard, label: "My Payments", path: "/buyer-dashboard/payments" },
-    { icon: UserX, label: "Delete Account", path: "/buyer-dashboard/delete-account" },
+    {
+      icon: FileText,
+      label: "Browse Products",
+      path: "/buyer-dashboard/products",
+    },
+    {
+      icon: CreditCard,
+      label: "My Payments",
+      path: "/buyer-dashboard/payments",
+    },
+    {
+      icon: UserX,
+      label: "Delete Account",
+      path: "/buyer-dashboard/delete-account",
+    },
   ];
 
   const location = useLocation();

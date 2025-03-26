@@ -25,6 +25,6 @@ router.get("/get-all-products/:userId", verifyToken, getUserProductsController);
 // Delete a product
 router.delete("/delete-product/:id",  deleteProductController);
 
-router.get("/get-all-products",  getAllProductsController);
+router.get("/get-all-products", getAllProductsController);
 
 export default router;

@@ -92,7 +92,7 @@ function Navbar() {
   };
 
   return (
-    <div className="navbar">
+    <div className="navbar bg-gradient-to-l from-green-300 to-green-500">
       <nav>
         <div className="logo">
           <h1>Pak Agrihub</h1>
