@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchAllTheProducts } from "../../../slices/productSlice";
 import { placeBid } from "../../../slices/auctionSlice";
+import { createOrder } from "../../../slices/orderSlice";
 import ProductCard from "../ui/ProductCard";
 import ProductDetail from "../ui/ProductDetail";
 import { Input } from "../ui/Input";
@@ -106,20 +107,43 @@ const ProductList = () => {
     });
 
   const categories = [...new Set(products.map((p) => p.category))];
+  console.log(categories);
+  
 
   return (
     <div className="container mx-auto p-4">
       <div className="flex items-center mb-6 space-x-4">
-        {/* Switch for Auction/All Products */}
-        <Switch checked={viewAuctions} onCheckedChange={setViewAuctions} />
-        <span>
-          {viewAuctions ? "Showing Auction Products" : "Showing All Products"}
-        </span>
+       {/* Switch for Auction/All Products */}
+<label className="relative inline-flex items-center cursor-pointer">
+  <input
+    type="checkbox"
+    className="sr-only peer"
+    checked={viewAuctions}
+    onChange={() => setViewAuctions(!viewAuctions)}
+  />
+  <div
+    className="group peer bg-white rounded-full duration-300 w-16 h-8 ring-2 
+    ring-gray-500 after:duration-300 after:bg-gray-500 peer-checked:after:bg-green-500 
+    peer-checked:ring-green-500 after:rounded-full after:absolute after:h-6 after:w-6 
+    after:top-1 after:left-1 after:flex after:justify-center after:items-center 
+    peer-checked:after:translate-x-8 peer-hover:after:scale-95"
+  ></div>
+</label>
+<span
+  className={`ml-3 text-sm font-medium ${
+    viewAuctions ? "text-green-600" : "text-gray-600"
+  }`}
+>
+  {viewAuctions ? "Showing Auction Products" : "Showing All Products"}
+</span>
+
+
 
         {/* Search Bar */}
         <Input
           placeholder="Search products..."
           value={searchTerm}
+          width="240px"
           onChange={(e) => setSearchTerm(e.target.value)}
           className="flex-grow"
         />

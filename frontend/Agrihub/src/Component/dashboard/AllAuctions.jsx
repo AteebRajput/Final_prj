@@ -28,9 +28,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../ui/product-ui/Dialog";
+import { useTranslation } from "react-i18next";
 
 const AllAuctions = () => {
   const dispatch = useDispatch();
+  const { t } = useTranslation();
   const { auctions } = useSelector((state) => state.auctions);
   const [selectedAuctionId, setSelectedAuctionId] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -39,17 +41,17 @@ const AllAuctions = () => {
   const bids = useSelector(
     (state) => state.auctions.auctionBids[selectedAuctionId] || []
   );
+  console.log("Bids are", bids);
 
   const loading = useSelector((state) => state.auctions.loading);
   const error = useSelector((state) => state.auctions.error);
-  console.log("Auctions are:",auctions);
-  
+
   useEffect(() => {
     dispatch(fetchAuctions());
   }, [dispatch]);
 
-  const handleEndAuction = (auctionId) => {
-    dispatch(endAuction(auctionId));
+  const handleEndAuction = (auctionId, ownerId) => {
+    dispatch(endAuction({ auctionId, ownerId }));
   };
 
   const handleOpenBids = (auctionId) => {
@@ -77,7 +79,11 @@ const AllAuctions = () => {
   }
 
   if (error) {
-    return <div className="text-red-500">Failed to load auctions: {error}</div>;
+    return (
+      <div className="text-red-500">
+        Failed to load auctions: {error?.message}
+      </div>
+    );
   }
 
   return (
@@ -87,7 +93,7 @@ const AllAuctions = () => {
           <CardTitle className="flex items-center gap-3 text-green-800">
             <Gavel className="w-7 h-7 text-green-600" strokeWidth={2} />
             <span className="text-xl font-semibold tracking-tight">
-              My Auction History
+             {t("auctionHistory")}
             </span>
           </CardTitle>
         </CardHeader>
@@ -96,14 +102,14 @@ const AllAuctions = () => {
             <TableHeader className="bg-green-50">
               <TableRow>
                 {[
-                  "Product",
-                  "Base Price",
-                  "Highest Bid",
-                  "Bidders",
-                  "Start Time",
-                  "End Time",
-                  "Status",
-                  "Actions",
+                  t("product"),
+                  t("basePrice"),
+                  t("highestBid"),
+                  t("bidders"),
+                  t("startTime"),
+                  t("endTime"),
+                  t("status"),
+                  t("actions"),
                 ].map((header) => (
                   <TableHead
                     key={header}
@@ -132,7 +138,7 @@ const AllAuctions = () => {
                         `${auction.highestBid.amount.toFixed(2)}`
                       </span>
                     ) : (
-                      <span className="text-gray-500">No bids</span>
+                      <span className="text-gray-500">{t("nobids")}</span>
                     )}
                   </TableCell>
                   <TableCell>
@@ -156,11 +162,13 @@ const AllAuctions = () => {
                         <Button
                           size="sm"
                           variant="destructive"
-                          onClick={() => handleEndAuction(auction.id)}
+                          onClick={() =>
+                            handleEndAuction(auction.id, auction.ownerId)
+                          }
                           className="bg-red-500 hover:bg-red-600"
                         >
                           <Clock className="mr-2 w-4 h-4" />
-                          End Auction
+                          {t("endAuction")}
                         </Button>
                       )}
                       {auction.status === "ended" && (
@@ -169,13 +177,13 @@ const AllAuctions = () => {
                             <>
                               <CheckCircle className="text-green-500 w-5 h-5" />
                               <span className="text-green-700 font-semibold">
-                                Winner: {auction.winner.name}
+                                {t("winner")}: {auction.winner.name}
                               </span>
                             </>
                           ) : (
                             <>
                               <XCircle className="text-red-500 w-5 h-5" />
-                              <span className="text-red-700">No Winner</span>
+                              <span className="text-red-700">{t("noWinner")}</span>
                             </>
                           )}
                         </div>
@@ -186,7 +194,7 @@ const AllAuctions = () => {
                         onClick={() => handleOpenBids(auction.id)}
                         className="border-green-300 text-green-700 hover:bg-green-50"
                       >
-                        <List className="mr-2 w-4 h-4" /> View Bids
+                        <List className="mr-2 w-4 h-4" /> {t("viewBids")}
                       </Button>
                     </div>
                   </TableCell>
@@ -197,7 +205,7 @@ const AllAuctions = () => {
           {auctions.length === 0 && (
             <div className="text-center py-6 bg-green-50 rounded-lg text-green-800">
               <Gavel className="mx-auto mb-4 w-12 h-12 text-green-500" />
-              <p className="text-lg font-semibold">No auctions found</p>
+              <p className="text-lg font-semibold">{t("noAuctionFound")}</p>
               <p className="text-sm text-green-600">
                 Start a new auction to see your history
               </p>
@@ -212,7 +220,7 @@ const AllAuctions = () => {
           <DialogHeader className="bg-green-50 p-4 rounded-t-xl border-b border-green-200">
             <DialogTitle className="flex items-center gap-3 text-green-800">
               <List className="w-6 h-6 text-green-600" strokeWidth={2} />
-              <span className="text-xl font-semibold">Auction Bids</span>
+              <span className="text-xl font-semibold">{t("auctionBids")}</span>
             </DialogTitle>
           </DialogHeader>
 
@@ -220,23 +228,23 @@ const AllAuctions = () => {
             {loading ? (
               <div className="flex justify-center items-center py-8">
                 <Loader2 className="animate-spin text-green-500 w-8 h-8" />
-                <span className="ml-3 text-green-700">Loading bids...</span>
+                <span className="ml-3 text-green-700">{t("loadingBids")}</span>
               </div>
             ) : error ? (
               <div className="text-center py-6 bg-red-50 rounded-lg">
                 <XCircle className="mx-auto mb-4 w-12 h-12 text-red-500" />
                 <p className="text-red-700 font-semibold">
-                  Failed to fetch bids
+                {t("failedBids")}
                 </p>
                 <p className="text-sm text-red-600">
-                  Please try again or check your connection
+                {t("tryAgain")}
                 </p>
               </div>
             ) : (
               <Table>
                 <TableHeader className="bg-green-50">
                   <TableRow>
-                    {["Bidder", "Bid Amount", "Bid Time"].map((header) => (
+                    {[t("bidder"), t("bidAmount"), t("bidTime")].map((header) => (
                       <TableHead
                         key={header}
                         className="text-green-800 font-semibold uppercase"
@@ -251,7 +259,7 @@ const AllAuctions = () => {
                     <TableRow>
                       <TableCell colSpan="3" className="text-center py-6">
                         <List className="mx-auto mb-4 w-12 h-12 text-green-300" />
-                        <p className="text-gray-500">No bids placed yet</p>
+                        <p className="text-gray-500">{t("noBidPlacedYet")}</p>
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -267,7 +275,7 @@ const AllAuctions = () => {
                           ${bid.amount.toFixed(2)}
                         </TableCell>
                         <TableCell className="text-sm text-gray-600">
-                          {new Date(bid.timestamp).toLocaleString()}
+                          {new Date(bid.createdAt).toLocaleString()}
                         </TableCell>
                       </TableRow>
                     ))
@@ -283,7 +291,7 @@ const AllAuctions = () => {
               onClick={() => setIsOpen(false)}
               className="border-green-300 text-green-700 hover:bg-green-50"
             >
-              Close
+            {t("close")}
             </Button>
           </div>
         </DialogContent>

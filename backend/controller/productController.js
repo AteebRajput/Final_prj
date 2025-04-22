@@ -1,8 +1,7 @@
 import Product from "../models/productModel.js";
+import Auction from "../models/auctionModel.js";
 
 import { createAuctionController } from "./auctionController.js"; // Import your auction controller
-
-import Auction from "../models/auctionModel.js";
 
 export const addProductController = async (req, res) => {
   try {
@@ -140,13 +139,20 @@ export const getUserProductsController = async (req, res) => {
 
 
 // Update product by ID
+
 export const updateProductController = async (req, res) => {
   try {
     const { id } = req.params;
     const updatedData = req.body;
 
     console.log("Product data to be updated: ", updatedData);
-    
+
+    // Find the existing product before updating
+    const existingProduct = await Product.findById(id);
+    if (!existingProduct) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+
     // Prepare data for update
     const dataToUpdate = {
       name: updatedData.name,
@@ -162,16 +168,46 @@ export const updateProductController = async (req, res) => {
       status: updatedData.status,
       upForAuction: updatedData.upForAuction,
       bidEndTime: updatedData.upForAuction ? new Date(updatedData.bidEndTime) : null,
-      seller: updatedData.seller
+      seller: updatedData.seller,
     };
 
-    const product = await Product.findByIdAndUpdate(id, dataToUpdate, { 
+    // Update the product
+    const product = await Product.findByIdAndUpdate(id, dataToUpdate, {
       new: true,
-      runValidators: true 
+      runValidators: true,
     });
 
     if (!product) {
-      return res.status(404).json({ error: "Product not found" });
+      return res.status(404).json({ error: "Product not found after update" });
+    }
+
+    // Check if there's an associated auction for this product
+    const auction = await Auction.findOne({ productId: id });
+
+    if (auction) {
+      const currentTime = new Date();
+      const newBidEndTime = new Date(updatedData.bidEndTime);
+      const previousBidEndTime = auction.endTime;
+
+      if(newBidEndTime > previousBidEndTime && newBidEndTime >currentTime){
+        product.status = "active"
+        await product.save()
+      }
+      // Check if the auction is expired and the new bid time is valid
+      if (
+        auction.status === "expired" &&
+        newBidEndTime > previousBidEndTime &&
+        newBidEndTime > currentTime
+      ) {
+        auction.status = "active";
+        auction.endTime = newBidEndTime;
+        await auction.save();
+
+         // Update product status as well
+         product.status = "active";
+         await product.save();
+        console.log(`Auction for product ${id} has been reactivated.`);
+      }
     }
 
     res.status(200).json({
@@ -183,10 +219,11 @@ export const updateProductController = async (req, res) => {
     res.status(500).json({
       message: "Failed to update product",
       errorMessage: error.message,
-      errorStack: error.stack
+      errorStack: error.stack,
     });
   }
 };
+
 
 
 // Delete product by ID
@@ -231,7 +268,7 @@ export const getAllProductsController = async (req, res) => {
     const products = await Product.find({ 
       status: 'active',
       // Optionally add more filters like not expired
-      expiryDate: { $gt: new Date() }
+      // expiryDate: { $gt: new Date() }
     });
 
     if (!products || products.length === 0) {

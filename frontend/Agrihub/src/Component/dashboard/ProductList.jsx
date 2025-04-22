@@ -26,6 +26,7 @@ import {
   TabsTrigger,
   TabsContent,
 } from "../ui/product-ui/Tabs";
+import { useTranslation } from "react-i18next";
 import { Scale, Timer, AlertCircle } from "lucide-react";
 import { Badge } from "../ui/Badge";
 import {
@@ -47,8 +48,9 @@ import {
 import { Textarea } from "../ui/product-ui/Textarea";
 import { Switch } from "../ui/product-ui/Switch";
 import axios from "axios";
+// import toast from "react-hot-toast";
 // import { json } from "express";
-
+import { toast } from "react-toastify";
 const PRODUCT_API_URL = "http://localhost:5000/api/product";
 
 export default function ProductsPage() {
@@ -59,8 +61,10 @@ export default function ProductsPage() {
   const [showUpdateDialog, setShowUpdateDialog] = useState(false);
   const [showDetailDialog, setShowDetailDialog] = useState(false);
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const { t } = useTranslation();
   const [selectedTab, setSelectedTab] = useState("all");
   const [showAuctionExtend, setShowAuctionExtend] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false)
   const [extendDuration, setExtendDuration] = useState({
     value: 1,
     unit: "hours",
@@ -99,7 +103,8 @@ export default function ProductsPage() {
     try {
       // Remove bidDuration if not applicable
       const { bidDuration, ...dataToSend } = productData;
-  
+      console.log("Data to send", dataToSend);
+
       const response = await axios.put(
         `${PRODUCT_API_URL}/update-product/${dataToSend._id}`,
         dataToSend,
@@ -111,9 +116,10 @@ export default function ProductsPage() {
           withCredentials: true,
         }
       );
-  
+
       if (response.data) {
         await fetchProducts();
+        toast.success("Product Updated successfully");
         setShowUpdateDialog(false);
         setShowAuctionExtend(false);
       }
@@ -126,12 +132,13 @@ export default function ProductsPage() {
       console.error("Error updating product:", err);
     }
   };
-  
+
   const handleDeleteProduct = async (productId) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
       try {
         await axios.delete(`${PRODUCT_API_URL}/delete-product/${productId}`);
         await fetchProducts(); // Refresh products after deletion
+        toast.success("Product deleted successfully!");
       } catch (err) {
         setError(err.response?.data?.message || "Failed to delete product");
       }
@@ -141,19 +148,17 @@ export default function ProductsPage() {
   const handleAddProduct = async (productData, imageFiles) => {
     try {
       const formData = new FormData();
-  
+
       // Append all text fields first
       Object.keys(productData).forEach((key) => {
         formData.append(key, productData[key]);
       });
-  
+
       // Append image files with correct field name
       imageFiles.forEach((file, index) => {
         formData.append(`images`, file); // Matches backend expectation
       });
-  
-      
-  
+
       const response = await axios.post(
         `${PRODUCT_API_URL}/add-product`,
         formData,
@@ -165,6 +170,7 @@ export default function ProductsPage() {
         }
       );
       await fetchProducts(); // Refresh products after addition
+      toast.success("Product Added Successfaully!");
       // Rest of your code remains the same
     } catch (error) {
       console.error("Add Product Error:", error.response?.data || error);
@@ -204,9 +210,9 @@ export default function ProductsPage() {
       e.preventDefault();
       const formData = new FormData(e.target);
       const data = Object.fromEntries(formData.entries());
-    
+
       const processedData = {
-        _id:product._id,
+        _id: product._id,
         ...data,
         seller: userId, // Add this line to include seller
         basePrice: Number(data.basePrice) || 0,
@@ -214,10 +220,13 @@ export default function ProductsPage() {
         upForAuction: data.upForAuction === "true",
         harvestDate: data.harvestDate ? new Date(data.harvestDate) : null,
         expiryDate: data.expiryDate ? new Date(data.expiryDate) : null,
-        bidEndTime: data.upForAuction === "true" && data.bidEndTime ? new Date(data.bidEndTime) : null,
+        bidEndTime:
+          data.upForAuction === "true" && data.bidEndTime
+            ? new Date(data.bidEndTime)
+            : null,
         status: data.status || "draft",
       };
-    
+
       onSubmit(processedData, imageFiles);
     };
 
@@ -226,7 +235,7 @@ export default function ProductsPage() {
         <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto bg-gradient-to-br from-white to-gray-50">
           <DialogHeader className="border-b pb-4">
             <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
-              {isNew ? "Add New Product" : "Update Product"}
+              {isNew ? `${t("addNewProduct")}` : `${t("updateProduct")}`}
             </DialogTitle>
           </DialogHeader>
 
@@ -234,13 +243,13 @@ export default function ProductsPage() {
             {/* Basic Information Card */}
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
               <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-800">
-                <ClipboardList className="w-5 h-5 text-primary" /> Basic
-                Information
+                <ClipboardList className="w-5 h-5 text-primary" />{" "}
+                {t("basicInfo")}
               </h3>
               <div className="space-y-4">
                 <div className="grid gap-2">
                   <Label htmlFor="name" className="text-gray-700">
-                    Product Name*
+                    {t("productName")}
                   </Label>
                   <Input
                     id="name"
@@ -253,7 +262,7 @@ export default function ProductsPage() {
 
                 <div className="grid gap-2">
                   <Label htmlFor="description" className="text-gray-700">
-                    Description*
+                    {t("discription")}
                   </Label>
                   <Textarea
                     id="description"
@@ -266,7 +275,7 @@ export default function ProductsPage() {
 
                 <div className="grid gap-2">
                   <Label htmlFor="category" className="text-gray-700">
-                    Category*
+                    {t("category")}
                   </Label>
                   <Input
                     id="category"
@@ -282,14 +291,14 @@ export default function ProductsPage() {
             {/* Price and Quantity Card */}
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
               <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-800">
-                <BadgeDollarSign className="w-5 h-5 text-primary" /> Pricing &
-                Quantity
+                <BadgeDollarSign className="w-5 h-5 text-primary" />{" "}
+                {t("pricing")}
               </h3>
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <div className="grid gap-2">
                     <Label htmlFor="basePrice" className="text-gray-700">
-                      Base Price* (₨)
+                      {t("baseprice")}
                     </Label>
                     <Input
                       id="basePrice"
@@ -305,7 +314,7 @@ export default function ProductsPage() {
 
                   <div className="grid gap-2">
                     <Label htmlFor="quantity" className="text-gray-700">
-                      Quantity*
+                      {t("quantity")}
                     </Label>
                     <Input
                       id="quantity"
@@ -322,24 +331,24 @@ export default function ProductsPage() {
                 <div className="space-y-4">
                   <div className="grid gap-2">
                     <Label htmlFor="unit" className="text-gray-700">
-                      Unit*
+                      {t("unit")}
                     </Label>
                     <Select name="unit" defaultValue={product.unit || "kg"}>
                       <SelectTrigger className="transition-shadow focus:shadow-md">
                         <SelectValue placeholder="Select unit" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="kg">Kilogram (kg)</SelectItem>
-                        <SelectItem value="liter">Liter</SelectItem>
-                        <SelectItem value="piece">Piece</SelectItem>
-                        <SelectItem value="box">Box</SelectItem>
+                        <SelectItem value="kg">{t("kilogram")}</SelectItem>
+                        <SelectItem value="liter">{t("liter")}</SelectItem>
+                        <SelectItem value="piece">{t("piece")}</SelectItem>
+                        <SelectItem value="box">{t("box")}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
                   <div className="grid gap-2">
                     <Label htmlFor="quality" className="text-gray-700">
-                      Quality Grade*
+                      {t("qualityGrade")}
                     </Label>
                     <Input
                       id="quality"
@@ -356,12 +365,12 @@ export default function ProductsPage() {
             {/* Location and Dates Card */}
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
               <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-800">
-                <MapPin className="w-5 h-5 text-primary" /> Location & Dates
+                <MapPin className="w-5 h-5 text-primary" /> {t("locationDate")}
               </h3>
               <div className="space-y-4">
                 <div className="grid gap-2">
                   <Label htmlFor="location" className="text-gray-700">
-                    Location*
+                    {t("location")}
                   </Label>
                   <Input
                     id="location"
@@ -375,7 +384,7 @@ export default function ProductsPage() {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="grid gap-2">
                     <Label htmlFor="harvestDate" className="text-gray-700">
-                      Harvest Date*
+                      {t("harvestDate")}
                     </Label>
                     <Input
                       id="harvestDate"
@@ -389,7 +398,7 @@ export default function ProductsPage() {
 
                   <div className="grid gap-2">
                     <Label htmlFor="expiryDate" className="text-gray-700">
-                      Expiry Date*
+                      {t("expiryDate")}
                     </Label>
                     <Input
                       id="expiryDate"
@@ -407,14 +416,13 @@ export default function ProductsPage() {
             {/* Status and Auction Card */}
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
               <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-800">
-                <Tag className="w-5 h-5 text-primary" /> Status & Auction
-                Settings
+                <Tag className="w-5 h-5 text-primary" /> {t("statusAuction")}
               </h3>
               <div className="space-y-4">
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="grid gap-2">
                     <Label htmlFor="status" className="text-gray-700">
-                      Status
+                      {t("statuss")}
                     </Label>
                     <Select
                       name="status"
@@ -424,17 +432,17 @@ export default function ProductsPage() {
                         <SelectValue placeholder="Select status" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="draft">Draft</SelectItem>
-                        <SelectItem value="active">Active</SelectItem>
-                        <SelectItem value="sold">Sold</SelectItem>
-                        <SelectItem value="expired">Expired</SelectItem>
+                        <SelectItem value="draft">{t("draft")}</SelectItem>
+                        <SelectItem value="active">{t("active")}</SelectItem>
+                        <SelectItem value="sold">{t("sold")}</SelectItem>
+                        <SelectItem value="expired">{t("expired")}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
                   <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                     <Label htmlFor="upForAuction" className="text-gray-700">
-                      Up For Auction
+                      {t("upForAuction")}
                     </Label>
                     <Switch
                       id="upForAuction"
@@ -447,7 +455,7 @@ export default function ProductsPage() {
 
                 <div className="grid gap-2">
                   <Label htmlFor="bidEndTime" className="text-gray-700">
-                    Auction End Time (if applicable)
+                    {t("auctionEnd")}
                   </Label>
                   <Input
                     id="bidEndTime"
@@ -462,7 +470,7 @@ export default function ProductsPage() {
 
             {/* Images Card */}
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-              <h3 className="text-lg font-semibold mb-4">Images</h3>
+              <h3 className="text-lg font-semibold mb-4">{t("images")}</h3>
               <div className="grid gap-4">
                 <input
                   type="file"
@@ -499,13 +507,13 @@ export default function ProductsPage() {
                 onClick={onClose}
                 className="hover:bg-gray-100 transition-colors duration-200"
               >
-                Cancel
+                {t("cancel")}
               </Button>
               <Button
                 type="submit"
                 className="bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-700 transition-all duration-300 shadow-md hover:shadow-lg"
               >
-                {isNew ? "Add Product" : "Update Product"}
+                {isNew ? `${t("addProduct")}` : `${t("updateProduct")}`}
               </Button>
             </div>
           </form>
@@ -551,8 +559,6 @@ export default function ProductsPage() {
       });
     };
 
-    
-
     return (
       <Dialog open={true} onOpenChange={onClose}>
         <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto bg-gradient-to-b from-white to-gray-50">
@@ -577,11 +583,11 @@ export default function ProductsPage() {
                   />
                   <Badge
                     className={`absolute top-4 right-4 shadow-xl ${
-                      product.status === "active"
+                      product.status === `${t("actives")}`
                         ? "bg-green-500/90 hover:bg-green-500"
-                        : product.status === "sold"
+                        : product.status === `${t("solds")}`
                         ? "bg-blue-500/90 hover:bg-blue-500"
-                        : product.status === "expired"
+                        : product.status === `${t("expireds")}`
                         ? "bg-red-500/90 hover:bg-red-500"
                         : "bg-yellow-500/90 hover:bg-yellow-500"
                     } backdrop-blur-sm transition-colors duration-300`}
@@ -620,14 +626,14 @@ export default function ProductsPage() {
                     <div className="flex items-center gap-2 mb-3">
                       <Timer className="w-6 h-6 text-amber-600" />
                       <h3 className="font-bold text-lg text-amber-800">
-                        Auction Status
+                        {t("auctionStatus")}
                       </h3>
                     </div>
                     <p className="text-2xl font-bold text-amber-900 mb-2">
                       {timeLeft ? timeLeft : "Loading..."}
                     </p>
                     <p className="text-sm text-amber-700">
-                      Ends: {formatDate(product.bidEndTime)}{" "}
+                      {t("ends")}: {formatDate(product.bidEndTime)}{" "}
                       {new Date(product.bidEndTime).toLocaleTimeString()}
                     </p>
                   </div>
@@ -642,7 +648,7 @@ export default function ProductsPage() {
                     <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">
                       <div className="flex items-center gap-3">
                         <Scale className="w-5 h-5 text-primary" />
-                        <span className="font-medium">Base Price</span>
+                        <span className="font-medium">{t("baseprice")}</span>
                       </div>
                       <span className="text-lg font-bold text-primary">
                         ₨ {product.basePrice}
@@ -652,7 +658,7 @@ export default function ProductsPage() {
                     <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">
                       <div className="flex items-center gap-3">
                         <Package className="w-5 h-5 text-primary" />
-                        <span className="font-medium">Quantity</span>
+                        <span className="font-medium">{t("quantity")}</span>
                       </div>
                       <span className="text-lg font-bold text-gray-700">
                         {product.quantity} {product.unit}
@@ -662,7 +668,7 @@ export default function ProductsPage() {
                     <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">
                       <div className="flex items-center gap-3">
                         <MapPin className="w-5 h-5 text-primary" />
-                        <span className="font-medium">Location</span>
+                        <span className="font-medium">{t("location")}</span>
                       </div>
                       <span className="text-gray-700">{product.location}</span>
                     </div>
@@ -675,17 +681,17 @@ export default function ProductsPage() {
             <div className="grid md:grid-cols-2 gap-4">
               <div className="p-4 bg-white rounded-xl shadow-sm border border-gray-100">
                 <h3 className="font-semibold mb-4 text-gray-800">
-                  Product Information
+                  {t("productInfo")}
                 </h3>
                 <div className="space-y-3">
                   <div>
-                    <p className="text-sm text-gray-500">Category</p>
+                    <p className="text-sm text-gray-500">{t("category")}</p>
                     <p className="font-medium text-gray-800">
                       {product.category}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Quality Grade</p>
+                    <p className="text-sm text-gray-500">{t("qualityGrade")}</p>
                     <p className="font-medium text-gray-800">
                       {product.quality}
                     </p>
@@ -695,13 +701,15 @@ export default function ProductsPage() {
 
               <div className="p-4 bg-white rounded-xl shadow-sm border border-gray-100">
                 <h3 className="font-semibold mb-4 text-gray-800">
-                  Important Dates
+                  {t("impDates")}
                 </h3>
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
                     <Calendar className="w-5 h-5 text-primary" />
                     <div>
-                      <p className="text-sm text-gray-500">Harvest Date</p>
+                      <p className="text-sm text-gray-500">
+                        {t("harvestDate")}
+                      </p>
                       <p className="font-medium text-gray-800">
                         {formatDate(product.harvestDate)}
                       </p>
@@ -710,7 +718,7 @@ export default function ProductsPage() {
                   <div className="flex items-center gap-2">
                     <AlertCircle className="w-5 h-5 text-red-500" />
                     <div>
-                      <p className="text-sm text-gray-500">Expiry Date</p>
+                      <p className="text-sm text-gray-500">{t("expiryDate")}</p>
                       <p className="font-medium text-gray-800">
                         {formatDate(product.expiryDate)}
                       </p>
@@ -724,7 +732,7 @@ export default function ProductsPage() {
               onClick={onClose}
               className="w-full bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl"
             >
-              Close
+              {t("close")}
             </Button>
           </div>
         </DialogContent>
@@ -747,18 +755,16 @@ export default function ProductsPage() {
         <div className="flex justify-between items-center bg-white rounded-xl p-6 shadow-sm">
           <div>
             <h1 className="text-4xl py-2 font-bold bg-gradient-to-r from-green-400 via-green-600 to-blue-900 bg-clip-text text-transparent">
-              Empowering Growth: Manage Your Agricultural Products with Ease
+              {t("empowering")}
             </h1>
 
-            <p className="text-gray-600 mt-1">
-              Manage your product inventory efficiently
-            </p>
+            <p className="text-gray-600 text-xl mt-1">{t("manage")}</p>
           </div>
           <Button
             onClick={() => setShowAddDialog(true)}
             className="bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl"
           >
-            <Plus className="w-4 h-4 mr-2" /> Add New Product
+            <Plus className="w-4 h-4 mr-2" /> {t("addNewProduct")}
           </Button>
         </div>
 
@@ -783,19 +789,19 @@ export default function ProductsPage() {
               value="all"
               className="data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all duration-300"
             >
-              <Package className="w-4 h-4 mr-2" /> All Products
+              <Package className="w-4 h-4 mr-2" /> {t("allProducts")}
             </TabsTrigger>
             <TabsTrigger
               value="normal"
               className="data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all duration-300"
             >
-              <Package className="w-4 h-4 mr-2" /> Regular
+              <Package className="w-4 h-4 mr-2" /> {t("regular")}
             </TabsTrigger>
             <TabsTrigger
               value="auction"
               className="data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all duration-300"
             >
-              <Clock className="w-4 h-4 mr-2" /> Auction
+              <Clock className="w-4 h-4 mr-2" /> {t("auction")}
             </TabsTrigger>
           </TabsList>
 
@@ -815,11 +821,11 @@ export default function ProductsPage() {
                       />
                       <Badge
                         className={`absolute top-4 right-4 ${
-                          product.status === "active"
+                          product.status === `${t("actives")}`
                             ? "bg-green-500"
-                            : product.status === "sold"
+                            : product.status === `${t("solds")}`
                             ? "bg-blue-500"
-                            : product.status === "expired"
+                            : product.status === `${t("expireds")}`
                             ? "bg-red-500"
                             : "bg-yellow-500"
                         } shadow-lg`}
@@ -828,7 +834,7 @@ export default function ProductsPage() {
                       </Badge>
                       {product.upForAuction && (
                         <Badge className="absolute top-4 left-4 bg-amber-500 shadow-lg">
-                          <Clock className="w-4 h-4 mr-1" /> AUCTION
+                          <Clock className="w-4 h-4 mr-1" /> {t("auction")}
                         </Badge>
                       )}
                     </div>
@@ -837,7 +843,7 @@ export default function ProductsPage() {
                     <h3 className="text-xl font-semibold mb-2 text-gray-800">
                       {product.name}
                     </h3>
-                    <p className="text-gray-600 line-clamp-2 mb-4">
+                    <p className="text-gray-600 text-md line-clamp-2 mb-4">
                       {product.description}
                     </p>
                     <div className="flex justify-between items-center text-sm text-gray-700">
@@ -849,8 +855,16 @@ export default function ProductsPage() {
                       </div>
                       <div className="flex items-center gap-2">
                         <Package className="w-4 h-4 text-primary" />
-                        <span>
-                          {product.quantity} {product.unit}
+                        <span
+                          className={
+                            product.quantity === 0
+                              ? "text-red-500"
+                              : "text-black"
+                          }
+                        >
+                          {product.quantity === 0
+                            ? `${t("Out Of Stock")}`
+                            : `${product.quantity} ${product.unit}`}
                         </span>
                       </div>
                     </div>
@@ -863,9 +877,9 @@ export default function ProductsPage() {
                         setSelectedProduct(product);
                         setShowDetailDialog(true);
                       }}
-                      className="hover:bg-primary hover:text-green hover:bg-green-500 transition-colors duration-300"
+                      className="hover:bg-primary hover:text-green hover:bg-green-500 hover:text-white transition-colors duration-300"
                     >
-                      <Eye className="w-4 h-4 mr-2" /> View
+                      <Eye className="w-4 h-4 mr-2" /> {t("view")}
                     </Button>
                     <Button
                       variant="outline"
@@ -876,7 +890,7 @@ export default function ProductsPage() {
                       }}
                       className="hover:bg-blue-600 hover:text-white transition-colors duration-300"
                     >
-                      <Edit className="w-4 h-4 mr-2" /> Edit
+                      <Edit className="w-4 h-4 mr-2" /> {t("edit")}
                     </Button>
                     <Button
                       variant="outline"
@@ -884,8 +898,14 @@ export default function ProductsPage() {
                       onClick={() => handleDeleteProduct(product._id)}
                       className="hover:bg-red-600 hover:text-white transition-colors duration-300"
                     >
-                      <Trash2 className="w-4 h-4 mr-2" /> Delete
+                      <Trash2 className="w-4 h-4 mr-2" /> {t("delete")}
                     </Button>
+                    <Button
+
+                    ></Button>
+                     <Button className="w-full" onClick={() => setIsChatOpen(true)}>
+            Chat with Seller
+          </Button>
                   </CardFooter>
                 </Card>
               ))}

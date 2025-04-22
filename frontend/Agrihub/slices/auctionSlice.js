@@ -1,16 +1,18 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import axios from "axios";
+import { User } from "lucide-react";
 
-const AUCTION_api = "http://localhost:5000/api/auction"
-const BID_API = "http://localhost:5000/api/bid"
-const ORDER_API = "http://localhost:5000/api/order"
+const AUCTION_api = "http://localhost:5000/api/auction";
+const BID_API = "http://localhost:5000/api/bid";
+const ORDER_API = "http://localhost:5000/api/order";
 
 // Async thunk to fetch auctions
 
-
-export const fetchAuctions = createAsyncThunk('auctions/fetchAuctions', async (_, { rejectWithValue }) => {
+export const fetchAuctions = createAsyncThunk(
+  "auctions/fetchAuctions",
+  async (_, { rejectWithValue }) => {
     try {
-      const userId = JSON.parse(localStorage.getItem('userId')).userId;
+      const userId = JSON.parse(localStorage.getItem("userId")).userId;
       // Send userId as a query parameter
       const response = await axios.get(`${AUCTION_api}/farmer-auctions`, {
         params: { userId }, // Pass userId as a query parameter
@@ -18,35 +20,39 @@ export const fetchAuctions = createAsyncThunk('auctions/fetchAuctions', async (_
 
       return response.data;
     } catch (error) {
-      console.error('API Error:', error);
-      return rejectWithValue(error.response?.data || 'Failed to fetch auctions');
+      console.error("API Error:", error);
+      return rejectWithValue(
+        error.response?.data || "Failed to fetch auctions"
+      );
     }
-  });
+  }
+);
 
-
-  export const fetchAuctionBids = createAsyncThunk(
-    'auctions/fetchAuctionBids',
-    async (auctionId, { rejectWithValue }) => {
-      try {
-        const response = await axios.get(
-          `http://localhost:5000/api/auction/${auctionId}/bids`
-        );
-        console.log('API Response:', response.data); // Debugging log
-        return { auctionId, bids: response.data };
-      } catch (error) {
-        console.error('Fetch Bids Error:', error); // Debugging log
-        return rejectWithValue(error.response?.data || 'Failed to fetch auction bids');
-      }
+export const fetchAuctionBids = createAsyncThunk(
+  "auctions/fetchAuctionBids",
+  async (auctionId, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:5000/api/auction/${auctionId}/bids`
+      );
+      console.log("API Response:", response.data); // Debugging log
+      return { auctionId, bids: response.data };
+    } catch (error) {
+      console.error("Fetch Bids Error:", error); // Debugging log
+      return rejectWithValue(
+        error.response?.data || "Failed to fetch auction bids"
+      );
     }
-  );
-  
-  // In auctionSlice.js
+  }
+);
+
+// In auctionSlice.js
 export const placeBid = createAsyncThunk(
-  'auctions/placeBid',
+  "auctions/placeBid",
   async (bidData, { rejectWithValue }) => {
     try {
-      console.log("Bid data:",bidData);
-      
+      console.log("Bid data:", bidData);
+
       const response = await axios.post(`${BID_API}/place-bid`, bidData);
       return response.data;
     } catch (error) {
@@ -56,17 +62,21 @@ export const placeBid = createAsyncThunk(
 );
 
 export const endAuction = createAsyncThunk(
-  'auctions/endAuction',
-  async ({ auctionId, farmerId }, { rejectWithValue }) => {
+  "auctions/endAuction",
+  async ({ auctionId, ownerId }, { rejectWithValue }) => {
+    console.log("Auction id", auctionId);
+    console.log("Farmer id", ownerId);
     try {
-      const response = await axios.post(`/api/auctions/${auctionId}/end`, { farmerId });
+      const response = await axios.post(`${AUCTION_api}/${auctionId}/end`, {
+        ownerId, manualEnd:true,
+      });
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
     }
   }
 );
-  
+
 // Place Bid Async Thunk
 // export const placeBid = createAsyncThunk(
 //   "auction/placeBid",
@@ -81,7 +91,7 @@ export const endAuction = createAsyncThunk(
 // );
 
 export const fetchAuctionDetails = createAsyncThunk(
-  'auctions/fetchAuctionDetails',
+  "auctions/fetchAuctionDetails",
   async (productId) => {
     const response = await fetch(`${AUCTION_api}/auction-details/${productId}`);
     const data = await response.json();
@@ -89,18 +99,34 @@ export const fetchAuctionDetails = createAsyncThunk(
   }
 );
 
+export const getUserSpecifBids = createAsyncThunk(
+  "auctions/getUserSpecificBids",
+  async (userId, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`${BID_API}/get-bids/${userId}`);
+      // console.log("API response",response.data);
+      if (response.status === 404) {
+        throw new Error("Failed to fetch bids.");
+        // return rejectWithValue("No bids found for this user.");
+      }
 
-
-
-
+      return response.data; // ✅ Use response.data instead of response.json()
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data || "Failed to fetch user bids"
+      );
+    }
+  }
+);
 
 const auctionSlice = createSlice({
-  name: 'auctions',
+  name: "auctions",
   initialState: {
     auctions: [],
     loading: false,
     error: null,
     auctionBids: {},
+    bids: [],
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -121,9 +147,11 @@ const auctionSlice = createSlice({
       // End auction
       .addCase(endAuction.fulfilled, (state, action) => {
         const { auctionId, winner } = action.payload;
-        const auction = state.auctions.find((auction) => auction.id === auctionId);
+        const auction = state.auctions.find(
+          (auction) => auction.id === auctionId
+        );
         if (auction) {
-          auction.status = 'ended';
+          auction.status = "ended";
           auction.winner = winner;
         }
       })
@@ -136,18 +164,18 @@ const auctionSlice = createSlice({
       })
       .addCase(fetchAuctionBids.fulfilled, (state, action) => {
         state.loading = false;
-      
+
         const { auctionId, bids } = action.payload;
-      
+
         // Update auctionBids state
         state.auctionBids = {
           ...state.auctionBids,
           [auctionId]: bids,
         };
-      
-        console.log('Fulfilled Action:', action.payload);
+
+        console.log("Fulfilled Action:", action.payload);
       })
-      
+
       .addCase(fetchAuctionBids.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
@@ -171,6 +199,28 @@ const auctionSlice = createSlice({
         state.error = action.payload;
       })
 
+      .addCase(getUserSpecifBids.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getUserSpecifBids.fulfilled, (state, action) => {
+        state.loading = false;
+        console.log("Redux: API Response Data:", action.payload);
+
+        // ✅ Ensure the correct field is stored
+        if (action.payload?.bids) {
+          state.bids = action.payload.bids; // ✅ Correct field
+          console.log("Redux: Bids stored in state:", state.bids);
+        } else {
+          state.bids = [];
+          console.error("Redux: No bids found in response");
+        }
+      })
+      .addCase(getUserSpecifBids.rejected, (state, action) => {
+        state.loading = false;
+        state.error = true;
+        state.bids = [];
+      })
 
       .addCase(fetchAuctionDetails.pending, (state) => {
         state.loading = true;
@@ -183,9 +233,9 @@ const auctionSlice = createSlice({
         state.loading = false;
         state.error = action.error.message;
       });
-    },
+  },
 });
 
-export const auctionReducer = auctionSlice.reducer
+export const auctionReducer = auctionSlice.reducer;
 
 // export default auctionSlice.reducer;

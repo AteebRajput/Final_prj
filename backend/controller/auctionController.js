@@ -1,5 +1,6 @@
 import Auction from "../models/auctionModel.js";
 import Product from "../models/productModel.js";
+import Order from "../models/orderModel.js";
 
 export const createAuctionController = async (req, res) => {
   try {
@@ -59,6 +60,7 @@ export const getFarmerAuctionsController = async (req, res) => {
       bidderCount: auction.bidders ? auction.bidders.length : 0, // Handle missing bidders array
       startTime: auction.startTime,
       endTime: auction.endTime,
+      ownerId: userId,
       status: auction.status,
     }));
 
@@ -91,58 +93,82 @@ export const getAuctionBidsController = async (req, res) => {
   }
 };
 
+
 export const endAuctionController = async (req, res) => {
   try {
-    const { auctionId } = req.params;
-    const { farmerId } = req.body;
+    const { auctionId } = req.params; // auctionId comes from URL params
+    const { ownerId, manualEnd } = req.body; // manualEnd flag indicates manual ending
 
-    const auction = await Auction.findOne({ 
-      _id: auctionId, 
-      ownerId: farmerId, 
-      status: "active" 
+    console.log("Auction Id:", auctionId);
+    console.log("Farmer Id:", ownerId);
+
+    // Find the active auction by auctionId, ownerId, and status
+    const auction = await Auction.findOne({
+      _id: auctionId,
+      ownerId: ownerId || auction?.ownerId, // Handle auto-end scenario
+      status: "active",
     });
 
     if (!auction) {
+      console.log("No active auction found.");
       return res.status(404).json({ error: "Active auction not found" });
     }
 
-    // Automatically end auction if time has passed
-    if (new Date() > auction.endTime) {
-      auction.status = "ended";
-      
-      if (auction.highestBid) {
-        // Create an order for the winning bid
-        const order = new Order({
-          productId: auction.productId,
-          buyerId: auction.highestBid.bidder,
-          sellerId: auction.ownerId,
-          amount: auction.highestBid.amount,
-          status: 'completed'
-        });
+    // Check whether the auction has expired or if manual ending is triggered
+    if (manualEnd || new Date() > auction.endTime) {
+      console.log(manualEnd ? "Ending auction manually" : "Auction time has passed.");
 
-        await order.save();
-        
-        // Optional: Remove product from active listings
-        await Product.findByIdAndUpdate(auction.productId, { 
-          status: 'sold', 
-          upForAuction: false 
-        });
-      }
+      // Call helper function to end the auction (same logic for both manual and auto-ending)
+      await endAuction(auction,auctionId);
 
-      await auction.save();
-
-      return res.status(200).json({ 
-        message: "Auction ended successfully", 
-        winner: auction.highestBid?.bidder || null 
+      return res.status(200).json({
+        message: "Auction ended successfully",
+        winner: auction.highestBid?.bidder || "No winner",
       });
     }
 
-    return res.status(400).json({ error: "Auction time has not yet ended" });
+    return res.status(400).json({ error: "Auction time has not yet ended." });
   } catch (error) {
     console.error("Error ending auction:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+// Helper function to handle auction ending process (winner logic and order creation)
+export const endAuction = async (auction,auctionId) => {
+  auction.status = "expired"; // Set status to "ended"
+
+  if (auction.highestBid) {
+    console.log("Auction has a highest bidder. Marking winner and creating order.");
+
+    // Create an order for the highest bid (winner)
+    const order = new Order({
+      productId: auction.productId,
+      buyerId: auction.highestBid.bidder,
+      sellerId: auction.ownerId,
+      orderType: "auction", // Set orderType to "auction"
+      auctionId: auction._id, // Link the auction
+      bidAmount: auction.highestBid.amount, // Set bid amount from highest bid
+      totalAmount: auction.highestBid.amount, // Set total amount to bidAmount (this is handled by pre-save)
+      status: 'completed',  // Set appropriate status
+    });
+  
+
+    await order.save();
+
+    // Optional: Update product to mark it as sold and remove from active listings
+    await Product.findByIdAndUpdate(auction.productId, {
+      status: "sold",
+      upForAuction: false,
+    });
+  } else {
+    console.log("No bids placed. Auction ended without a winner.");
+  }
+
+  // Save the updated auction
+  await auction.save();
+};
+
 
 // Fetch auction details for a specific product
 export const getAuctionDetails = async (req, res) => {

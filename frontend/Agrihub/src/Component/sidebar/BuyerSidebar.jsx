@@ -1,6 +1,7 @@
 import React from "react";
-import { ShoppingCart, FileText, User, CreditCard, UserX } from "lucide-react";
+import { ShoppingCart, FileText, User, CreditCard,Coins, UserX } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
+import profileImage from "../../assets/832.jpg"
 
 const BuyerSidebar = () => {
   const menuItems = [
@@ -21,6 +22,11 @@ const BuyerSidebar = () => {
       path: "/buyer-dashboard/payments",
     },
     {
+      icon: Coins,
+      label: "My Bids",
+      path: "/buyer-dashboard/bids",
+    },
+    {
       icon: UserX,
       label: "Delete Account",
       path: "/buyer-dashboard/delete-account",
@@ -29,21 +35,23 @@ const BuyerSidebar = () => {
 
   const location = useLocation();
   const activePath = location.pathname;
+  const data = JSON.parse(localStorage.getItem("user"));
+
 
   return (
     <aside className="fixed top-20 left-0 h-full w-64 bg-white border-r border-gray-200">
       {/* Profile Section */}
       <div className="p-6 border-b border-gray-200">
         <div className="flex flex-col items-center">
-          <div className="w-20 h-20 rounded-full bg-gray-200 overflow-hidden mb-4">
+          <div className="w-25 h-25 rounded-full bg-gray-200 overflow-hidden mb-4">
             <img
-              src="/api/placeholder/80/80"
+              src={profileImage}
               alt="Profile"
               className="w-full h-full object-cover"
             />
           </div>
-          <h2 className="text-lg font-semibold text-gray-900">Jane Doe</h2>
-          <p className="text-sm text-gray-500">City Buyer</p>
+          <h2 className="text-lg font-semibold text-gray-900">{data?.user.name}</h2>
+          <p className="text-sm text-gray-500">{data?.user.company}</p>
         </div>
       </div>
 
@@ -54,9 +62,9 @@ const BuyerSidebar = () => {
             <li key={item.path}>
               <Link
                 to={item.path}
-                className={`w-full flex items-center px-4 py-3 rounded-lg text-sm ${
+                className={`w-full flex items-center px-4 py-3 rounded-lg text-md ${
                   activePath === item.path
-                    ? "bg-blue-50 text-blue-700"
+                    ? "bg-green-100 text-green-700"
                     : "text-gray-700 hover:bg-gray-50"
                 }`}
               >

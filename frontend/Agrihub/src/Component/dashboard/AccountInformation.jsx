@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Card, CardContent, CardHeader, CardTitle } from "../../Component/ui/Card";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
+import { useTransform } from "framer-motion";
 import {
   User,
   Mail,
@@ -16,11 +17,13 @@ import {
   BookOpen,
 } from "lucide-react";
 import { updateUser, fetchUserData } from "../../../slices/userSlice";
+import { useTranslation } from "react-i18next";
 
 const AccountInformation = () => {
   const dispatch = useDispatch();
   const { status, error, user } = useSelector((state) => state.user);
   const [isEditing, setIsEditing] = useState(false);
+  const { t } = useTranslation()
   
   const [formData, setFormData] = useState({
     name: "",
@@ -96,7 +99,7 @@ const AccountInformation = () => {
       <div className="p-4 lg:p-8 max-w-7xl mx-auto flex justify-center items-center min-h-[400px]">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading user information...</p>
+          <p className="mt-4 text-gray-600">{t("loadingUserInfo")}</p>
         </div>
       </div>
     );
@@ -106,12 +109,12 @@ const AccountInformation = () => {
     return (
       <div className="p-4 lg:p-8 max-w-7xl mx-auto flex justify-center items-center min-h-[400px]">
         <div className="text-center text-red-500">
-          <p>Failed to load user information.</p>
+          <p>{t("failedToLoadInfo")}</p>
           <Button
             onClick={() => dispatch(fetchUserData())}
             className="mt-4 bg-blue-600 hover:bg-blue-700 text-white"
           >
-            Retry
+            {t("retry")}
           </Button>
         </div>
       </div>
@@ -123,9 +126,9 @@ const AccountInformation = () => {
   return (
     <div className="p-4 lg:p-8 max-w-7xl mx-auto">
       <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300">
-        <CardHeader className="bg-gradient-to-r from-green-50 to-green-50 rounded-t-lg">
+        <CardHeader className="bg-gradient-to-r from-green-100 to-green-100 rounded-t-lg">
           <CardTitle className="flex items-center justify-between py-2">
-            <span className="text-2xl font-bold text-gray-800">Account Information</span>
+            <span className="text-2xl font-bold text-gray-800">{t("accountInfo")}</span>
             <div className="space-x-3">
               {isEditing && (
                 <Button
@@ -133,7 +136,7 @@ const AccountInformation = () => {
                   variant="outline"
                   className="hover:bg-gray-100 transition-colors"
                 >
-                  Cancel
+                  {t("cancel")}
                 </Button>
               )}
               <Button
@@ -142,7 +145,7 @@ const AccountInformation = () => {
                 disabled={status === "loading"}
                 className="bg-green-600 hover:bg-green-700 text-white transition-colors"
               >
-                {status === "loading" ? "Saving..." : isEditing ? "Save Changes" : "Edit Profile"}
+                {status === "loading" ? "Saving..." : isEditing ? `${t("saveChanges")}` : `${t("editProfile")}`}
               </Button>
             </div>
           </CardTitle>
@@ -153,11 +156,11 @@ const AccountInformation = () => {
             <section className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300">
               <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center">
                 <User className="w-6 h-6 text-blue-500 mr-2" />
-                Personal Information
+                {t("personalInfo")}
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-gray-700">Full Name</label>
+                  <label className="text-sm font-semibold text-gray-700">{t("fullName")}</label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <Input
@@ -171,7 +174,7 @@ const AccountInformation = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-gray-700">Email</label>
+                  <label className="text-sm font-semibold text-gray-700">{t("email")}</label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <Input
@@ -186,7 +189,7 @@ const AccountInformation = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-gray-700">Phone</label>
+                  <label className="text-sm font-semibold text-gray-700">{t("phone")}</label>
                   <div className="relative">
                     <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <Input
@@ -200,7 +203,7 @@ const AccountInformation = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-gray-700">NIC</label>
+                  <label className="text-sm font-semibold text-gray-700">{t("nic")}</label>
                   <div className="relative">
                     <FileText className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <Input
@@ -219,11 +222,11 @@ const AccountInformation = () => {
             <section className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300">
               <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center">
                 <MapPin className="w-6 h-6 text-green-500 mr-2" />
-                Location Information
+                {t("locationinfo")}
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-gray-700">Address</label>
+                  <label className="text-sm font-semibold text-gray-700">{t("address")}</label>
                   <div className="relative">
                     <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <Input
@@ -237,7 +240,7 @@ const AccountInformation = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-gray-700">Postal Code</label>
+                  <label className="text-sm font-semibold text-gray-700">{t("postalCode")}</label>
                   <div className="relative">
                     <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <Input
@@ -251,7 +254,7 @@ const AccountInformation = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-gray-700">Preferred Language</label>
+                  <label className="text-sm font-semibold text-gray-700">{t("preferredLang")}</label>
                   <div className="relative">
                     <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <select
@@ -276,11 +279,11 @@ const AccountInformation = () => {
             <section className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300">
               <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center">
                 <Building className="w-6 h-6 text-orange-500 mr-2" />
-                Company Information
+                {t("companyInfo")}
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-gray-700">Company</label>
+                  <label className="text-sm font-semibold text-gray-700">{t("company")}</label>
                   <div className="relative">
                     <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <Input
@@ -294,7 +297,7 @@ const AccountInformation = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-gray-700">Activity</label>
+                  <label className="text-sm font-semibold text-gray-700">{t("activity")}</label>
                   <div className="relative">
                     <Activity className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <Input
@@ -308,7 +311,7 @@ const AccountInformation = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-gray-700">Company VAT</label>
+                  <label className="text-sm font-semibold text-gray-700">{t("companyVAT")}</label>
                   <div className="relative">
                     <TagIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <Input

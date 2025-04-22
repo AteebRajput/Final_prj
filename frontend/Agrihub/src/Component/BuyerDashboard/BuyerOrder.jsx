@@ -19,15 +19,18 @@ const BuyerOrder = () => {
     const fetchOrdersData = async () => {
       try {
         const response = await dispatch(fetchOrders()).unwrap(); // Use `unwrap` for asyncThunk response
+        console.log("Response Order is",response.orders);
+        
         setLocalOrders(response.orders); // Assuming `orders` is part of the API response
       } catch (error) {
         console.error("Error fetching orders:", error);
       }
     };
-
+    
     fetchOrdersData();
   }, [dispatch]);
-
+  console.log("local order",localOrders);
+  
   if (loading) return <div>Loading orders...</div>;
   if (error) return <div className="text-red-500">Error: {error}</div>;
 
@@ -41,6 +44,7 @@ const BuyerOrder = () => {
             <TableHead>Seller</TableHead>
             <TableHead>Product</TableHead>
             <TableHead>Amount</TableHead>
+            <TableHead>Quantity</TableHead>
             <TableHead>Status</TableHead>
           </TableRow>
         </TableHeader>
@@ -48,9 +52,10 @@ const BuyerOrder = () => {
           {(localOrders.length > 0 ? localOrders : orders).map((order) => (
             <TableRow key={order._id}>
               <TableCell>{order._id}</TableCell>
-              <TableCell>{order.farmerId?.name || "N/A"}</TableCell>
+              <TableCell>{order.sellerId?.name || "N/A"}</TableCell>
               <TableCell>{order.productId?.name || "N/A"}</TableCell>
-              <TableCell>${order.amount?.toFixed(2) || "0.00"}</TableCell>
+              <TableCell>${order.totalAmount?.toFixed(2) || "0.00"}</TableCell>
+              <TableCell>{order.quantity} Kg</TableCell>
               <TableCell>{order.status}</TableCell>
             </TableRow>
           ))}

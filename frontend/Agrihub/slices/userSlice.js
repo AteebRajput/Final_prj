@@ -68,6 +68,29 @@ export const fetchUserData = createAsyncThunk(
   }
 );
 
+const fetchUserName = createAsyncThunk(
+  "user/fetchData",
+  async (_, { rejectWithValue }) => {
+    try {
+      const data = JSON.parse(localStorage.getItem("userId"));
+      const userId = data.userId;
+
+      if (!data || !userId) {
+        console.log("User ID not found");
+        throw new Error("User ID not found in localStorage");
+      }
+
+      // Send userId as a query parameter
+      const response = await axios.get(`http://localhost:5000/api/auth/getUser?userId=${userId}`);
+      return response.data.user;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || error.message || "Failed to fetch user data"
+      );
+    }
+  }
+);
+
 // Async Thunk for sign-up
 export const signupUser = createAsyncThunk(
   "user/signup",

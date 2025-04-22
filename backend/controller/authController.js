@@ -136,7 +136,7 @@ export const updateUser = async (req, res) => {
   
   
 
-  // const { userId } = req.params; // Assuming user ID is passed as a route parameter
+  
   const {
     userId,
     name,

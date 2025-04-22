@@ -4,7 +4,8 @@ import {
   placeOrderController,
   updateOrderStatusController,
   fetchFarmerOrdersController,
-  fetchUserOrder
+  fetchUserOrder,
+  deleteOrderController
 } from "../controller/orderController.js";
 
 const router = express.Router();
@@ -15,5 +16,6 @@ router.put("/:orderId/status", updateOrderStatusController);
 // Fetch orders for a specific farmer
 router.get("/get-orders/:farmerId", fetchFarmerOrdersController);
 router.get("/get-user-orders/:userId", fetchUserOrder);
+router.delete("/delete-order/:orderId",deleteOrderController)
 // router.get("")
 export default router;

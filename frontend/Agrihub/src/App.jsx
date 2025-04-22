@@ -1,6 +1,7 @@
 import "./App.css";
 import MainPage from "./Component/Firstpage/MainPage";
 import Signup from "./pages/signup/signup";
+import "./i18n.js"
 import {
   BrowserRouter as Router,
   Route,
@@ -19,9 +20,11 @@ import ProductsPage from "./Component/dashboard/ProductList";
 import ProductList from "./Component/BuyerDashboard/ProductList";
 import BuyerDashboard from "./pages/dashboard/BuyerDashboars";
 import BuyerOrder from "./Component/BuyerDashboard/BuyerOrder";
+import MessagesSeller from "./Component/dashboard/MessagesSeller.jsx";
 import { useSelector } from "react-redux";
 import { ToastContainer } from "react-toastify"; // Import ToastContainer
 import "react-toastify/dist/ReactToastify.css"; // Import Toastify CSS
+import BuyerBids from "./Component/BuyerDashboard/BuyerBids";
 
 const ProtectedRoute = ({ element }) => {
   const isLoggedIn = useSelector((state) => state.user.isLoggedIn);
@@ -64,6 +67,8 @@ function App() {
             <Route path="orders" element={<MyOrders />} />
             <Route path="products" element={<ProductsPage />} />
             <Route path="auctions" element={<AllAuctions />} />
+            <Route path="seller-messages" element={<MessagesSeller />} />
+
           </Route>
 
           {/* Buyer Dashboard Route */}
@@ -71,9 +76,12 @@ function App() {
             path="/buyer-dashboard/*"
             element={<ProtectedRoute element={<BuyerDashboard />} />}
           >
-            <Route path="products" element={<ProductList />} />
+            <Route index element={<Navigate to="account" replace />} />
             <Route path="account" element={<AccountInformation />} />
-            {/* <Route path="orders" element={<BuyerOrder />} /> */}
+            <Route path="products" element={<ProductList />} />
+            <Route path="orders" element={<BuyerOrder />} />
+            <Route path="bids" element={<BuyerBids />} />
+
           </Route>
         </Routes>
       </Router>

@@ -39,6 +39,33 @@ export const createOrder = createAsyncThunk(
   }
 );
 
+// Delete order async thunk
+export const deleteOrder = createAsyncThunk(
+  "orders/deleteOrder",
+  async (orderId, { rejectWithValue }) => {
+    try {
+      const response = await axios.delete(`${ORDER_API}/delete-order/${orderId}`);
+      if (response.status === 200){
+        toast.success("Order Deleted Successfully!", {
+          position: "top-left",
+          autoClose: 3000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: false,
+          theme: "dark",
+        });
+      }
+      return { orderId };
+    } catch (error) {
+      console.error("Delete order error:", error);
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to delete the order."
+      );
+    }
+  }
+);
+
 export const fetchFarmerOrders = createAsyncThunk(
   "farmerOrders/fetchFarmerOrders",
   async (_, { rejectWithValue }) => {
@@ -61,6 +88,17 @@ export const updateOrderStatus = createAsyncThunk(
       const response = await axios.put(`${ORDER_API}/${orderId}/status`, {
         status,
       });
+      if(response.status === 200){
+        toast.success("Order Updated Successfully!", {
+          position: "top-left",
+          autoClose: 3000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: false,
+          theme: "dark",
+        });
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(
@@ -80,8 +118,9 @@ const ordersSlice = createSlice({
         state.loading = true;
       })
       .addCase(fetchOrders.fulfilled, (state, action) => {
+        
         state.loading = false;
-        state.orders = action.payload;
+        state.orders = action.payload.orders;
       })
       .addCase(fetchOrders.rejected, (state, action) => {
         state.loading = false;
@@ -125,7 +164,21 @@ const ordersSlice = createSlice({
       .addCase(createOrder.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      .addCase(deleteOrder.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(deleteOrder.fulfilled, (state, action) => {
+        state.loading = false;
+        state.orders = state.orders.filter(
+          (order) => order._id !== action.payload.orderId
+        );
+      })
+      .addCase(deleteOrder.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
+
   },
 });
 

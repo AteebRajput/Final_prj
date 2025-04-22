@@ -7,6 +7,8 @@ import { Alert, AlertDescription } from "../ui/product-ui/Alert";
 import { fetchAuctionDetails, placeBid } from "../../../slices/auctionSlice";
 import { createOrder } from "../../../slices/orderSlice";
 import { toast } from "react-toastify";
+import ChatButton from "../chat/ChatButton";
+import ChatDialog from "../chat/ChatDialog";
 
 import {
   Card,
@@ -40,6 +42,7 @@ const ProductCard = ({ product, onDetails, onPlaceOrder }) => {
   const [isOrderDialogOpen, setIsOrderDialogOpen] = useState(false);
   const [orderQuantity, setOrderQuantity] = useState("");
   const { orderStatus } = useSelector((state) => state.orders);
+  const [isChatOpen,setIsChatOpen] = useState(false)
 
   const fetchLatestAuctionDetails = useCallback(async () => {
     try {
@@ -52,6 +55,8 @@ const ProductCard = ({ product, onDetails, onPlaceOrder }) => {
       // Don't show error message for background refreshes
     }
   }, [dispatch, product._id]);
+
+const currentUserId = JSON.parse(localStorage.getItem("userId")).userId
 
   const isAuctionActive =
     product.upForAuction && new Date(product.bidEndTime) > new Date();
@@ -72,7 +77,8 @@ const ProductCard = ({ product, onDetails, onPlaceOrder }) => {
       };
     }
   }, [isBidDialogOpen, isAuctionActive, fetchLatestAuctionDetails]);
-
+  console.log("Chat open: ",isChatOpen);
+  
   useEffect(() => {
     return () => {
       if (refreshInterval) {
@@ -287,33 +293,59 @@ const ProductCard = ({ product, onDetails, onPlaceOrder }) => {
         )}
       </CardContent>
 
-      <CardFooter className="p-4 bg-gray-50 rounded-b-lg">
-        <div className="grid grid-cols-2 gap-3 w-full">
-          <Button variant="outline" onClick={onDetails} className="w-full">
-            View Details
-          </Button>
+      <CardFooter className="p-4 bg-gray-50 rounded-b-lg flex flex-col gap-3">
+  {/* Group View Details & Place Order in a Grid */}
+  <div className="grid grid-cols-2 gap-3 w-full">
+    <Button variant="outline" onClick={onDetails} className="w-full">
+      View Details
+    </Button>
 
-          {isAuctionActive ? (
-            <Button
-              variant="default"
-              onClick={handleBidDialogOpen}
-              disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              {loading ? "Loading..." : "Place Bid"}
-            </Button>
-          ) : (
-            <Button
-              variant="default"
-              onClick={handleOrderDialogOpen}
-              className="w-full bg-green-600 hover:bg-green-700 text-white"
-            >
-              Place Order
-            </Button>
-          )}
-        </div>
-      </CardFooter>
+    {isAuctionActive ? (
+      <Button
+        variant="default"
+        onClick={handleBidDialogOpen}
+        disabled={loading}
+        className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+      >
+        {loading ? "Loading..." : "Place Bid"}
+      </Button>
+    ) : (
+      <Button
+        variant="default"
+        onClick={handleOrderDialogOpen}
+        className="w-full bg-green-500 hover:bg-green-700 text-white"
+      >
+        Place Order
+      </Button>
+    )}
+  </div>
 
+
+
+  {/* Chat with Seller Button - Full Width Below */}
+  {/* <Button className="w-full bg-gradient-to-b from-green-500 to-emerald-800" onClick={() => setIsChatOpen(true)}>
+    Chat with Seller
+  </Button> */}
+  <ChatButton 
+      currentUserId={currentUserId}
+      sellerId={product.seller}
+      sellerName={product.name}
+      productId={product._id}
+      productName={product.name}
+      productImage={product.images[0]}
+      />
+</CardFooter>
+{console.log(product)
+}
+{/* <ChatDialog
+        isOpen={isChatOpen}
+        onClose={() => setIsChatOpen(false)}
+        sellerId={product.seller}
+        sellerName={product.name}
+        productId={product._id}
+        productName={product.name}
+      /> */}
+      
       <Dialog
         className="bg-gray-500"
         open={isBidDialogOpen}
@@ -421,6 +453,8 @@ const ProductCard = ({ product, onDetails, onPlaceOrder }) => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      
 
       {/* {Order dialog box} */}
       <Dialog open={isOrderDialogOpen} onOpenChange={handleOrderDialogClose}>

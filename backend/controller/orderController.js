@@ -132,6 +132,39 @@ export const updateOrderStatusController = async (req, res) => {
 };
 
 
+// Controller to delete an order
+export const deleteOrderController = async (req, res) => {
+  try {
+    const { orderId } = req.params; // Get orderId from route parameters
+
+    // Find the order by ID
+    const order = await Order.findById(orderId);
+
+    // Check if the order exists
+    if (!order) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+    if (order.status === "completed") {
+      return res.status(400).json({error:"The order is completed. You can't delete it now"})
+    }
+    // Restore the product's quantity if the order was canceled
+    const product = await Product.findById(order.productId);
+    if (product && order.orderType === "fixed") {
+      product.quantity += order.quantity;
+      await product.save(); // Save updated product quantity
+    }
+
+    // Delete the order from the database
+    await Order.findByIdAndDelete(orderId);
+
+    res.status(200).json({ message: "Order deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting order:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+
 export const fetchFarmerOrdersController = async (req, res) => {
   const { farmerId } = req.params; // Extract farmerId from route params
   const { status } = req.query; // Extract status from query params
@@ -164,7 +197,8 @@ export const fetchUserOrder = async(req,res) => {
     // Fetch orders and populate referenced fields
     const orders = await Order.find(filter)
       .populate('productId', 'name email') // Populate product details
-      .populate('buyerId', 'name email'); // Populate buyer details (winner)
+      .populate('buyerId', 'name email') // Populate buyer details (winner)
+      .populate('sellerId','name email');
 
     res.status(200).json({ success: true, orders });
   } catch (error) {
@@ -172,3 +206,4 @@ export const fetchUserOrder = async(req,res) => {
     res.status(500).json({ success: false, error: 'Internal server error' });
   }
 }
+

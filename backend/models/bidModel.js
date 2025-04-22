@@ -2,6 +2,11 @@ import mongoose from "mongoose";
 
 const bidSchema = new mongoose.Schema(
   {
+    auctionId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Auction", // Reference to the Auction model
+      required: true,
+    },
     productId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Product",
@@ -23,4 +28,3 @@ const bidSchema = new mongoose.Schema(
 );
 
 export const Bid = mongoose.model("Bid", bidSchema);
-

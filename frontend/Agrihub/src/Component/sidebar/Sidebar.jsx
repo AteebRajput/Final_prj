@@ -1,6 +1,7 @@
 import React from "react";
-import { Store, ShoppingCart, FileText, Gavel, UserX, User } from "lucide-react";
+import { Store, ShoppingCart, FileText, Gavel, UserX, User,MessageCircleMore } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
+import profileImage from "../../assets/832.jpg"
 
 const FarmerSidebar = () => {
   const menuItems = [
@@ -9,7 +10,10 @@ const FarmerSidebar = () => {
     { icon: Store, label: "Product List", path: "/dashboard/products" },
     { icon: Gavel, label: "All Bids", path: "/dashboard/auctions" },
     { icon: UserX, label: "Delete Account", path: "/dashboard/delete-account" },
+    {icon: MessageCircleMore, label: "Messages" ,path:"/dashboard/seller-messages"}
   ];
+
+  const data = JSON.parse(localStorage.getItem("user"));
 
   const location = useLocation();
   const activePath = location.pathname;
@@ -19,15 +23,17 @@ const FarmerSidebar = () => {
       {/* Profile Section */}
       <div className="p-6 border-b border-gray-200">
         <div className="flex flex-col items-center">
-          <div className="w-20 h-20 rounded-full bg-gray-200 overflow-hidden mb-4">
+          <div className="w-25 h-25 rounded-full bg-gray-200 overflow-hidden mb-4">
             <img
-              src="/api/placeholder/80/80"
+              src={profileImage}
               alt="Profile"
+              width={"w-24"}
+              height={"h-24"}
               className="w-full h-full object-cover"
             />
           </div>
-          <h2 className="text-lg font-semibold text-gray-900">John Doe</h2>
-          <p className="text-sm text-gray-500">City Shopkeeper</p>
+          <h2 className="text-lg font-semibold text-gray-900">{data?.user.name}</h2>
+          <p className="text-sm text-gray-500">{data?.user.company}</p>
         </div>
       </div>
 
@@ -38,9 +44,9 @@ const FarmerSidebar = () => {
             <li key={item.path}>
               <Link
                 to={item.path}
-                className={`w-full flex items-center px-4 py-3 rounded-lg text-sm ${
+                className={`w-full flex items-center px-4 py-3 rounded-lg text-md ${
                   activePath === item.path
-                    ? "bg-green-50 text-green-700"
+                    ? "bg-green-100 text-green-700"
                     : "text-gray-700 hover:bg-gray-50"
                 }`}
               >
