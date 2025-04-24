@@ -34,7 +34,6 @@ import {
   CardContent,
   CardFooter,
   CardHeader,
-  CardTitle,
 } from "../ui/product-ui/Card";
 import { Input } from "../ui/product-ui/Input";
 import { Label } from "../ui/product-ui/Label";
@@ -64,7 +63,7 @@ export default function ProductsPage() {
   const { t } = useTranslation();
   const [selectedTab, setSelectedTab] = useState("all");
   const [showAuctionExtend, setShowAuctionExtend] = useState(false);
-  const [isChatOpen, setIsChatOpen] = useState(false)
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const [extendDuration, setExtendDuration] = useState({
     value: 1,
     unit: "hours",
@@ -869,7 +868,7 @@ export default function ProductsPage() {
                       </div>
                     </div>
                   </CardContent>
-                  <CardFooter className="bg-gray-50 p-4 flex justify-between gap-2">
+                  <CardFooter className="bg-gray-50 p-4 flex items-center justify-between gap-2">
                     <Button
                       variant="outline"
                       size="sm"
@@ -900,12 +899,13 @@ export default function ProductsPage() {
                     >
                       <Trash2 className="w-4 h-4 mr-2" /> {t("delete")}
                     </Button>
-                    <Button
-
-                    ></Button>
-                     <Button className="w-full" onClick={() => setIsChatOpen(true)}>
-            Chat with Seller
-          </Button>
+                    
+                    {/* <Button
+                      className="w-full"
+                      onClick={() => setIsChatOpen(true)}
+                    >
+                      {t("chatWithSeller")}
+                    </Button> */}
                   </CardFooter>
                 </Card>
               ))}

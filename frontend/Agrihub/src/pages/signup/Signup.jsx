@@ -8,7 +8,7 @@ import "react-toastify/dist/ReactToastify.css"; // Import Toastify styles
 
 function Signup() {
   const dispatch = useDispatch();
-  const { loading, error, user } = useSelector((state) => state.user);
+  const {  user } = useSelector((state) => state.user);
   const navigate = useNavigate()
   useEffect(() =>{
     if(user){

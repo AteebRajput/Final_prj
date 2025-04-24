@@ -1,6 +1,6 @@
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
-import { VERIFICATION_EMAIL_TEMPLATE, WELCOME_EMAIL_TEMPLATE,PASSWORD_RESET_REQUEST_TEMPLATE, PASSWORD_RESET_SUCCESS_TEMPLATE } from "./emailTemplates.js";
+import { VERIFICATION_EMAIL_TEMPLATE, WELCOME_EMAIL_TEMPLATE,PASSWORD_RESET_REQUEST_TEMPLATE, PASSWORD_RESET_SUCCESS_TEMPLATE, AUCTION_CREATED_TEMPLATE } from "./emailTemplates.js";
 
 dotenv.config();
 
@@ -97,19 +97,48 @@ export const sendPasswordResetEmail = async (email, resetURL) => {
 };
 
 export const sendResetSuccessfullEmail = async (email) =>{
-    
     try {
         const mailOptions = {
             to:email,
             from: `"AgriHub" <${process.env.GMAIL_USER}>`,
             subject:"Passwors Reset Successfully",
             html: PASSWORD_RESET_SUCCESS_TEMPLATE,
-            category: "Password Reset"        
+            category: "Password Reset"
         }
         const info = await transporter.sendMail(mailOptions);
         console.log("Password reset email sent:", info.messageId);
     } catch (error) {
-        
+
     }
 }
 
+export const sendAuctionCreatedEmail = async (email, data) => {
+    try {
+      const html = AUCTION_CREATED_TEMPLATE
+        .replace("{name}", data.name)
+        .replace("{productName}", data.productName)
+        .replace("{category}", data.category)
+        .replace("{quantity}", data.quantity)
+        .replace("{unit}", data.unit)
+        .replace("{basePrice}", data.basePrice)
+        .replace("{quality}", data.quality)
+        .replace("{harvestDate}", data.harvestDate)
+        .replace("{expiryDate}", data.expiryDate)
+        .replace("{location}", data.location)
+        .replace("{bidEndTime}", data.bidEndTime)
+        .replace("{productURL}", data.productURL);
+  
+      const mailOptions = {
+        to: email,
+        from: `"AgriHub" <${process.env.GMAIL_USER}>`,
+        subject: "Auction Created Successfully",
+        html: html,
+      };
+  
+      const info = await transporter.sendMail(mailOptions);
+      console.log("Auction creation email sent:", info.messageId);
+    } catch (error) {
+      console.error("Failed to send auction email:", error);
+    }
+  };
+  

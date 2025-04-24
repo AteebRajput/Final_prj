@@ -1,10 +1,12 @@
 import Auction from "../models/auctionModel.js";
 import Product from "../models/productModel.js";
 import Order from "../models/orderModel.js";
+import User from "../models/userModel.js";
 
 export const createAuctionController = async (req, res) => {
   try {
     const { productId, bidDuration } = req.body;
+console.log("request hits");
 
     // Validate input
     if (!productId || !bidDuration || !["hours", "days"].includes(bidDuration.unit) || isNaN(bidDuration.value)) {
@@ -13,6 +15,9 @@ export const createAuctionController = async (req, res) => {
 
     const product = await Product.findById(productId);
     if (!product) return res.status(404).json({ error: "Product not found" });
+    const sellerInfo = await User.findById(product.seller)
+    console.log("Seller info",sellerInfo);
+    
 
     const currentTime = new Date();
     
@@ -27,10 +32,23 @@ export const createAuctionController = async (req, res) => {
       basePrice: product.basePrice,
       endTime,
     });
-
+    await sendAuctionCreatedEmail(sellerInfo.email, {
+      name: sellerInfo.name,
+      productName: product.name,
+      category: product.category,
+      quantity: product.quantity,
+      unit: product.unit,
+      basePrice: product.basePrice,
+      quality: product.quality,
+      harvestDate: product.harvestDate.toDateString(),
+      expiryDate: product.expiryDate.toDateString(),
+      location: product.location,
+      bidEndTime: endTime.toDateString(),
+      productURL: `https://your-domain.com/products/${product._id}`
+    });
     await auction.save();
 
-    res.status(201).json({ message: "Auction created successfully", auction });
+    res.status(201).json({ message: "Auction created successfully",auction});
   } catch (error) {
     console.error("Error creating auction:", error);
     res.status(500).json({ error: "Internal server error" });

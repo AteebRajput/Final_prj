@@ -123,9 +123,18 @@ const resources = {
       view:"View",
       edit:"Edit",
       addProduct:"Add Product",
+      chatWithSeller:"Chat",
+    
+      // Farmer sidebar
+      myOrder:"My Orders",
+      productList:"Product List",
+      allBids: "All Bids",
+      messages: "Messages",
+
+      // Buyer Section
+      // Buyer Order page
+      seller:"Seller"
       
-       
-      // My Order
 
     },
   },
@@ -248,6 +257,17 @@ const resources = {
       view: "دیکھیں",
       edit: "ترمیم کریں",
       addProduct: "پروڈکٹ شامل کریں",
+      chatWithSeller: "فروخت کنندہ سے بات کریں",
+
+      // Farmer Sidebar
+      myOrder: "میرے آرڈرز",
+      productList: "مصنوعات کی فہرست",
+      allBids: "تمام بولیاں",
+      messages: "پیغامات",
+
+      // Buyer 
+      // My Order Page
+      seller: "فروخت کنندہ"
     },
   },
 };

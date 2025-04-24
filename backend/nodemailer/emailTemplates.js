@@ -155,3 +155,53 @@ export const WELCOME_EMAIL_TEMPLATE = `
 </body>
 </html>
 `;
+
+export const AUCTION_CREATED_TEMPLATE = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Auction Created</title>
+</head>
+<body style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <div style="background: linear-gradient(to right, #4CAF50, #45a049); padding: 20px; text-align: center;">
+    <h1 style="color: white; margin: 0;">Your Auction is Live!</h1>
+  </div>
+
+  <div style="background-color: #f9f9f9; padding: 20px; border-radius: 0 0 5px 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+    <p>Hi {name},</p>
+    <p>Your product auction has been successfully created on <strong>AgriHub</strong>. Here are the details of your listing:</p>
+
+    <h3 style="color: #4CAF50;">📦 Product Information:</h3>
+    <ul style="padding-left: 20px;">
+      <li><strong>Name:</strong> {productName}</li>
+      <li><strong>Category:</strong> {category}</li>
+      <li><strong>Quantity:</strong> {quantity} {unit}</li>
+      <li><strong>Base Price:</strong> Rs. {basePrice}</li>
+      <li><strong>Quality:</strong> {quality}</li>
+      <li><strong>Harvest Date:</strong> {harvestDate}</li>
+      <li><strong>Expiry Date:</strong> {expiryDate}</li>
+      <li><strong>Location:</strong> {location}</li>
+    </ul>
+
+    <h3 style="color: #4CAF50;">⏱ Auction Details:</h3>
+    <ul style="padding-left: 20px;">
+      <li><strong>Status:</strong> Active</li>
+      <li><strong>Auction Ends On:</strong> {bidEndTime}</li>
+    </ul>
+
+    <div style="text-align: center; margin: 30px 0;">
+      <a href="{productURL}" style="background-color: #4CAF50; color: white; padding: 12px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;">View Auction</a>
+    </div>
+
+    <p>Good luck with your auction! If you have any questions, feel free to reach out to our support team.</p>
+    <p>Best regards,<br>The AgriHub Team</p>
+  </div>
+
+  <div style="text-align: center; margin-top: 20px; color: #888; font-size: 0.8em;">
+    <p>This is an automated message. Please do not reply directly to this email.</p>
+  </div>
+</body>
+</html>
+`;

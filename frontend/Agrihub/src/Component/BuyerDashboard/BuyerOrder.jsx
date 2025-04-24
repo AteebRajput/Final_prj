@@ -9,11 +9,13 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/Table";
+import { useTranslation } from "react-i18next";
 
 const BuyerOrder = () => {
   const dispatch = useDispatch();
   const { orders, loading, error } = useSelector((state) => state.orders); // Use Redux state for orders
   const [localOrders, setLocalOrders] = useState([]); // If you need local state for orders
+  const { t } = useTranslation()
 
   useEffect(() => {
     const fetchOrdersData = async () => {
@@ -40,12 +42,12 @@ const BuyerOrder = () => {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Order ID</TableHead>
-            <TableHead>Seller</TableHead>
-            <TableHead>Product</TableHead>
-            <TableHead>Amount</TableHead>
-            <TableHead>Quantity</TableHead>
-            <TableHead>Status</TableHead>
+            <TableHead>{t("orderId")}</TableHead>
+            <TableHead>{t("seller")}</TableHead>
+            <TableHead>{t("product")}</TableHead>
+            <TableHead>{t("amount")}</TableHead>
+            <TableHead>{t("quantity")}</TableHead>
+            <TableHead>{t("status")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

@@ -11,7 +11,6 @@ import {
 } from "../nodemailer/emails.js";
 
 export const signupController = async (req, res) => {
-  console.log("Request Body:", req.body);
 
   const {
     name,

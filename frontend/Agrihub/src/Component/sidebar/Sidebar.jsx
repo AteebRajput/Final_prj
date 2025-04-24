@@ -1,16 +1,17 @@
-import React from "react";
-import { Store, ShoppingCart, FileText, Gavel, UserX, User,MessageCircleMore } from "lucide-react";
+import { Store, ShoppingCart, Gavel, UserX, User,MessageCircleMore } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import profileImage from "../../assets/832.jpg"
+import { useTranslation } from "react-i18next";
 
 const FarmerSidebar = () => {
+
+  const {t} = useTranslation()
   const menuItems = [
-    { icon: User, label: "Account Information", path: "/dashboard/account" },
-    { icon: ShoppingCart, label: "My Orders", path: "/dashboard/orders" },
-    { icon: Store, label: "Product List", path: "/dashboard/products" },
-    { icon: Gavel, label: "All Bids", path: "/dashboard/auctions" },
-    { icon: UserX, label: "Delete Account", path: "/dashboard/delete-account" },
-    {icon: MessageCircleMore, label: "Messages" ,path:"/dashboard/seller-messages"}
+    { icon: User, label: `${t("accountInfo")}`, path: "/dashboard/account" },
+    { icon: ShoppingCart, label: `${t("myOrder")}`, path: "/dashboard/orders" },
+    { icon: Store, label: `${t("productList")}`, path: "/dashboard/products" },
+    { icon: Gavel, label: `${t("allBids")}`, path: "/dashboard/auctions" },
+    {icon: MessageCircleMore, label: `${t("messages")}` ,path:"/dashboard/seller-messages"}
   ];
 
   const data = JSON.parse(localStorage.getItem("user"));

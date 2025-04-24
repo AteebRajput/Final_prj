@@ -232,7 +232,7 @@ const userSlice = createSlice({
     user: JSON.parse(localStorage.getItem("user")) || null,
     loading: false,
     error: null,
-    status:"",
+    status:false,
     isVerified: false,
     isLoggedIn: !!localStorage.getItem("user"), // Set to true if user data exists
   },
@@ -247,6 +247,7 @@ const userSlice = createSlice({
       .addCase(signupUser.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload;
+        state.status = true
       })
       .addCase(signupUser.rejected, (state, action) => {
         state.loading = false;
