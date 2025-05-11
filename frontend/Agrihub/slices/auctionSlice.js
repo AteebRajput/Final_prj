@@ -109,8 +109,9 @@ export const getUserSpecifBids = createAsyncThunk(
         throw new Error("Failed to fetch bids.");
         // return rejectWithValue("No bids found for this user.");
       }
-
+      console.log("API Response:", response.data); // Debugging log
       return response.data; // ✅ Use response.data instead of response.json()
+
     } catch (error) {
       return rejectWithValue(
         error.response?.data || "Failed to fetch user bids"
@@ -206,16 +207,19 @@ const auctionSlice = createSlice({
       .addCase(getUserSpecifBids.fulfilled, (state, action) => {
         state.loading = false;
         console.log("Redux: API Response Data:", action.payload);
-
-        // ✅ Ensure the correct field is stored
+      
         if (action.payload?.bids) {
-          state.bids = action.payload.bids; // ✅ Correct field
-          console.log("Redux: Bids stored in state:", state.bids);
+          // ✅ Filter out bids with null productId
+          const validBids = action.payload.bids.filter(bid => bid.productId !== null);
+      
+          state.bids = validBids;
+          console.log("Redux: Valid Bids stored in state:", state.bids);
         } else {
           state.bids = [];
           console.error("Redux: No bids found in response");
         }
       })
+      
       .addCase(getUserSpecifBids.rejected, (state, action) => {
         state.loading = false;
         state.error = true;

@@ -1,44 +1,64 @@
 import { useState, useEffect } from 'react';
+import axios from 'axios';
 import { listenToChats, markChatAsRead } from '../../lib/chatUtils';
-// import { ChatListItem } from '../chat/chat-list-item';
 import ChatListItem from '../chat/chat-list-item';
-// import { ChatDialog } from '../ui/product-ui/ChatDialog';
 import ChatDialog from '../chat/ChatDialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/product-ui/Tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/product-ui/Card';
 import { MessageSquare } from 'lucide-react';
 
-const user = JSON.parse(localStorage.getItem("user"))
-// console.log("Current user: ",user.user);
-let currentUser = {}
-if(user){
- currentUser = {
+// Get current user from localStorage
+const user = JSON.parse(localStorage.getItem("user"));
+let currentUser = {};
+if (user) {
+  currentUser = {
     id: user.user._id,
     name: user.user.name,
     role: user.user.role,
   };
 }
 
-const getOtherUserName = (participants, currentUserId) => {
-  const otherUserId = participants.find((id) => id !== currentUserId);
-  return otherUserId === 'seller456' ? 'Jane Smith (Seller)' : 'Bob Johnson (Buyer)';
-};
-
 export default function MessagesSeller() {
   const [chats, setChats] = useState([]);
   const [selectedChat, setSelectedChat] = useState(null);
   const [isChatDialogOpen, setIsChatDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('all');
+  const [usernames, setUsernames] = useState({}); // store usernames by userId
 
+  // Function to fetch and store username for a userId
+  const fetchAndStoreUsername = async (userId) => {
+    if (usernames[userId]) return; // already fetched
+
+    try {
+      const response = await axios.get(`http://localhost:5000/api/auth/getUsername?userId=${userId}`);
+      const username = response.data.username;
+      setUsernames((prev) => ({ ...prev, [userId]: username }));
+    } catch (error) {
+      console.error(`Error fetching username for ${userId}:`, error.message);
+      setUsernames((prev) => ({ ...prev, [userId]: "Unknown User" }));
+    }
+  };
+
+  // Fetch chats and usernames when component mounts
   useEffect(() => {
-    console.log("current User",currentUser);
-    
-    const unsubscribe = listenToChats(currentUser.id, (updatedChats) => {
+    const unsubscribe = listenToChats(currentUser.id, async (updatedChats) => {
       setChats(updatedChats);
+
+      // For each chat, fetch the other participant's username
+      updatedChats.forEach((chat) => {
+        const otherUserId = chat.participants.find((id) => id !== currentUser.id);
+        if (otherUserId) fetchAndStoreUsername(otherUserId);
+      });
     });
+
     return () => unsubscribe();
   }, []);
-console.log("Updated chats:",chats);
+
+  // Get readable name for other user in chat
+  const getOtherUserName = (participants, currentUserId) => {
+    const otherUserId = participants.find((id) => id !== currentUserId);
+    return usernames[otherUserId] || "Loading...";
+  };
 
   const handleChatSelect = (chat) => {
     setSelectedChat(chat);
@@ -46,7 +66,6 @@ console.log("Updated chats:",chats);
     markChatAsRead(chat.id, currentUser.id);
   };
 
-  console.log("chat ID",selectedChat)
   const filteredChats = activeTab === 'all' ? chats : chats.filter((chat) => chat.unreadCount > 0);
 
   return (
@@ -58,7 +77,9 @@ console.log("Updated chats:",chats);
               <MessageSquare className="h-5 w-5" />
               Your Messages
             </CardTitle>
-            <CardDescription>View and manage your conversations with buyers and sellers</CardDescription>
+            <CardDescription>
+              View and manage your conversations with buyers and sellers
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="all" className="w-full" onValueChange={setActiveTab}>
@@ -91,7 +112,9 @@ console.log("Updated chats:",chats);
                     <div className="text-center py-8 text-muted-foreground">
                       <MessageSquare className="mx-auto h-12 w-12 mb-3 opacity-20" />
                       <p>No messages yet</p>
-                      <p className="text-sm">When you contact sellers or receive messages, they'll appear here</p>
+                      <p className="text-sm">
+                        When you contact sellers or receive messages, they'll appear here
+                      </p>
                     </div>
                   )}
                 </div>
@@ -122,12 +145,9 @@ console.log("Updated chats:",chats);
         </Card>
       </div>
 
-{
-    selectedChat ? `chatID: ${selectedChat.id}` : `No chat ID found`
-}
+      {/* {selectedChat ? `chatID: ${selectedChat.id}` : `No chat ID found`} */}
+
       {selectedChat && (
-            
-        
         <ChatDialog
           isOpen={isChatDialogOpen}
           onClose={() => setIsChatDialogOpen(false)}

@@ -1,5 +1,5 @@
 import express from "express"
-import { checkAuth, forgotPassword, loginController, logoutController, resetPassword, signupController, verifyEmail, updateUser, getUserData } from "../controller/authController.js"
+import { checkAuth, forgotPassword, loginController, logoutController, resetPassword, signupController, verifyEmail, updateUser, getUserData, getUserName } from "../controller/authController.js"
 import {verifyToken} from "../middleware/verifyToken.js"
 const router = express.Router()
 
@@ -21,4 +21,5 @@ router.put("/update-user",updateUser)
 
 router.get("/getUser",getUserData)
 
+router.get("/getUsername",getUserName)
 export default router

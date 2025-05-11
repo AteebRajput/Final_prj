@@ -1,6 +1,8 @@
 import Auction from "../models/auctionModel.js";
+import Product from "../models/productModel.js";
 import { Bid } from "../models/bidModel.js";
 import User from "../models/userModel.js";
+import {sendNewBidEmailToOwner} from "../nodemailer/emails.js"
 
 export const placeBidController = async (req, res) => {
   try {
@@ -47,9 +49,27 @@ export const placeBidController = async (req, res) => {
       bidder: bidderId,
       amount: bidAmount,
     });
-
     await bid.save();
 
+    // Fetch owner and product and bidder full details
+const product = await Product.findById(productId);
+const owner = await User.findById(auction.ownerId);
+const bidder = await User.findById(bidderId);
+
+// Prepare email data
+const emailData = {
+  ownerName: owner.name,
+  ownerEmail: owner.email,
+  productName: product.name,
+  bidderName: bidder.name,
+  bidderEmail: bidder.email,
+  bidderPhone: bidder.phone,
+  bidderLocation: bidder.location,
+  bidAmount: bidAmount
+};
+
+// Send email
+await sendNewBidEmailToOwner(owner.email, emailData);
     res.status(200).json({ message: "Bid placed successfully", auction });
   } catch (error) {
     console.error("Error placing bid:", error);
@@ -81,6 +101,8 @@ export const getUserSpecificBids = async (req, res) => {
     }
 
     res.status(200).json({ message: "User bids retrieved successfully", bids: bidData });
+    console.log("User bids:", bidData);
+    
   } catch (error) {
     console.error("Error fetching user bids:", error);
     res.status(500).json({ error: "Internal server error" });

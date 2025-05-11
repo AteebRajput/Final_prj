@@ -144,6 +144,8 @@ export default function BidsPage() {
     //       </div>
     //     );
     //   }
+    console.log("bids", bids);
+    
       
 
   return (

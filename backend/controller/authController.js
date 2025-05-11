@@ -254,6 +254,41 @@ export const getUserData = async (req, res) => {
     });
   }
 };
+export const getUserName = async (req, res) => {
+  try {
+    const { userId } = req.query;
+    console.log("Raw query:", req.query);
+    console.log("Parsed userId is", userId, "Type:", typeof userId);
+
+    if (!userId || typeof userId !== 'string') {
+      return res.status(400).json({
+        success: false,
+        message: "Valid user ID is required",
+      });
+    }
+
+    const user = await User.findById(userId).select("name");
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      username: user.name,
+    });
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
+  }
+};
+
 
 
 

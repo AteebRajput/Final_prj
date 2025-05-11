@@ -44,11 +44,15 @@ export const addProductController = async (req, res) => {
     }
 
     if (isNaN(basePrice) || basePrice <= 0) {
-      return res.status(400).json({ error: "Base price must be a positive number" });
+      return res
+        .status(400)
+        .json({ error: "Base price must be a positive number" });
     }
 
     if (isNaN(quantity) || quantity <= 0) {
-      return res.status(400).json({ error: "Quantity must be a positive number" });
+      return res
+        .status(400)
+        .json({ error: "Quantity must be a positive number" });
     }
 
     // Parse dates
@@ -132,11 +136,7 @@ export const getUserProductsController = async (req, res) => {
       error: error.message,
     });
   }
-};  
-
-
-
-
+};
 
 // Update product by ID
 
@@ -167,7 +167,9 @@ export const updateProductController = async (req, res) => {
       expiryDate: new Date(updatedData.expiryDate),
       status: updatedData.status,
       upForAuction: updatedData.upForAuction,
-      bidEndTime: updatedData.upForAuction ? new Date(updatedData.bidEndTime) : null,
+      bidEndTime: updatedData.upForAuction
+        ? new Date(updatedData.bidEndTime)
+        : null,
       seller: updatedData.seller,
     };
 
@@ -189,9 +191,9 @@ export const updateProductController = async (req, res) => {
       const newBidEndTime = new Date(updatedData.bidEndTime);
       const previousBidEndTime = auction.endTime;
 
-      if(newBidEndTime > previousBidEndTime && newBidEndTime >currentTime){
-        product.status = "active"
-        await product.save()
+      if (newBidEndTime > previousBidEndTime && newBidEndTime > currentTime) {
+        product.status = "active";
+        await product.save();
       }
       // Check if the auction is expired and the new bid time is valid
       if (
@@ -203,9 +205,9 @@ export const updateProductController = async (req, res) => {
         auction.endTime = newBidEndTime;
         await auction.save();
 
-         // Update product status as well
-         product.status = "active";
-         await product.save();
+        // Update product status as well
+        product.status = "active";
+        await product.save();
         console.log(`Auction for product ${id} has been reactivated.`);
       }
     }
@@ -223,8 +225,6 @@ export const updateProductController = async (req, res) => {
     });
   }
 };
-
-
 
 // Delete product by ID
 export const deleteProductController = async (req, res) => {
@@ -260,13 +260,12 @@ export const deleteProductController = async (req, res) => {
   }
 };
 
-
 // Get all active products
 export const getAllProductsController = async (req, res) => {
   try {
     // Fetch all active products
-    const products = await Product.find({ 
-      status: 'active',
+    const products = await Product.find({
+      status: "active",
       // Optionally add more filters like not expired
       // expiryDate: { $gt: new Date() }
     });
@@ -275,25 +274,20 @@ export const getAllProductsController = async (req, res) => {
       return res.status(200).json({
         message: "No active products found",
         products: [],
-        totalProducts: 0
+        totalProducts: 0,
       });
     }
 
     res.status(200).json({
       message: "Products fetched successfully",
       products,
-      totalProducts: products.length
+      totalProducts: products.length,
     });
   } catch (error) {
     console.error("Error fetching all products:", error);
     res.status(500).json({
       message: "Failed to fetch products",
-      error: error.message
+      error: error.message,
     });
   }
 };
-
-
-
-
-

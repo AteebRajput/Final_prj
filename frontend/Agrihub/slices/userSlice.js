@@ -81,8 +81,8 @@ const fetchUserName = createAsyncThunk(
       }
 
       // Send userId as a query parameter
-      const response = await axios.get(`http://localhost:5000/api/auth/getUser?userId=${userId}`);
-      return response.data.user;
+      const response = await axios.get(`http://localhost:5000/api/auth/getUsername?userId=${userId}`);
+      return response.data.username;
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.message || error.message || "Failed to fetch user data"

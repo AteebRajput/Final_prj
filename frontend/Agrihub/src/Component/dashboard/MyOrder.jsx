@@ -35,16 +35,13 @@ const MyOrders = () => {
 
   const handleDeleteOrder = (orderId) => {
     if (window.confirm("Are you sure you want to delete this order?")) {
-      dispatch(deleteOrder(orderId))
-        .unwrap()
-        .catch((err) => {
-          toast.error("Failed to delete order. Try again.");
-        });
+      dispatch(deleteOrder(orderId));
+      dispatch(fetchFarmerOrders()); // Refresh the orders after deletion
     }
   };
 
   if (loading) return <div>{t("loadingOrder")}</div>;
-  if (error) return <div className="text-red-500">Error: {error}</div>;
+  // if (error) return <div className="text-red-500">Error: {error}</div>;
 
   return (
     <div className="p-4">

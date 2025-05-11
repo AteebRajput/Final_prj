@@ -13,28 +13,37 @@ import { useTranslation } from "react-i18next";
 
 const BuyerOrder = () => {
   const dispatch = useDispatch();
-  const { orders, loading, error } = useSelector((state) => state.orders); // Use Redux state for orders
-  const [localOrders, setLocalOrders] = useState([]); // If you need local state for orders
-  const { t } = useTranslation()
+  const { orders, loading, error } = useSelector((state) => state.orders);
+  const [localOrders, setLocalOrders] = useState([]);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const fetchOrdersData = async () => {
       try {
-        const response = await dispatch(fetchOrders()).unwrap(); // Use `unwrap` for asyncThunk response
-        console.log("Response Order is",response.orders);
-        
-        setLocalOrders(response.orders); // Assuming `orders` is part of the API response
+        const response = await dispatch(fetchOrders()).unwrap();
+        setLocalOrders(response.orders);
       } catch (error) {
         console.error("Error fetching orders:", error);
       }
     };
-    
+
     fetchOrdersData();
   }, [dispatch]);
-  console.log("local order",localOrders);
-  
+
   if (loading) return <div>Loading orders...</div>;
   if (error) return <div className="text-red-500">Error: {error}</div>;
+
+  const sortedOrders = [...(localOrders.length > 0 ? localOrders : orders)].sort(
+    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+  );
+
+  const formatDateTime = (isoString) => {
+    const date = new Date(isoString);
+    return date.toLocaleString("en-US", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    });
+  };
 
   return (
     <div className="p-4">
@@ -48,17 +57,19 @@ const BuyerOrder = () => {
             <TableHead>{t("amount")}</TableHead>
             <TableHead>{t("quantity")}</TableHead>
             <TableHead>{t("status")}</TableHead>
+            <TableHead>{t("orderTime") || "Order Time"}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {(localOrders.length > 0 ? localOrders : orders).map((order) => (
+          {sortedOrders.map((order) => (
             <TableRow key={order._id}>
               <TableCell>{order._id}</TableCell>
               <TableCell>{order.sellerId?.name || "N/A"}</TableCell>
-              <TableCell>{order.productId?.name || "N/A"}</TableCell>
+              <TableCell>{order.productId?.name || "Auction Item"}</TableCell>
               <TableCell>${order.totalAmount?.toFixed(2) || "0.00"}</TableCell>
-              <TableCell>{order.quantity} Kg</TableCell>
+              <TableCell>{order.quantity ? `${order.quantity} Kg` : "-"}</TableCell>
               <TableCell>{order.status}</TableCell>
+              <TableCell>{formatDateTime(order.createdAt)}</TableCell>
             </TableRow>
           ))}
         </TableBody>

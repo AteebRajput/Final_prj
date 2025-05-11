@@ -37,7 +37,7 @@ export const createChat = async (buyerId, sellerId, productId, productName, prod
 };
 
 export const sendMessage = async (chatId, senderId, text) => {
-    console.log("Senderid",senderId);
+    // console.log("Senderid",senderId);
     
   const messagesRef = collection(db, `chats/${chatId}/messages`);
   const chatRef = doc(db, "chats", chatId);
@@ -80,10 +80,12 @@ export const markChatAsRead = async (chatId, userId) => {
 };
 
 export const listenToChats = (userId, callback) => {
-    console.log("userid",userId);
+    // console.log("userid",userId);
     
-  const chatsRef = collection(db, "chats");
-  const q = query(chatsRef, where("participants", "array-contains", userId));
+    const q = query(
+      collection(db, "chats"),
+      where("participants", "array-contains", userId)
+    );
 
   return onSnapshot(q, snapshot => {
     const chats = snapshot.docs.map(doc => ({
@@ -95,7 +97,7 @@ export const listenToChats = (userId, callback) => {
       if (!b.lastMessage?.timestamp) return -1;
       return b.lastMessage.timestamp.seconds - a.lastMessage.timestamp.seconds;
     });
-    console.log("chats are:",chats);
+    // console.log("chats are:",chats);
     
     callback(chats);
   });

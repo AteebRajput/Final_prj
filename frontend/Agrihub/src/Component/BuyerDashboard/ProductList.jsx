@@ -6,6 +6,7 @@ import { createOrder } from "../../../slices/orderSlice";
 import ProductCard from "../ui/ProductCard";
 import ProductDetail from "../ui/ProductDetail";
 import { Input } from "../ui/Input";
+import {useTranslation} from "react-i18next";
 import {
   Dialog,
   DialogContent,
@@ -27,6 +28,7 @@ const ProductList = () => {
   const dispatch = useDispatch();
   const { products, loading, error } = useSelector((state) => state.products);
   const { auctions } = useSelector((state) => state.auctions);
+  const { t } = useTranslation(); // Initialize translation function
 
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
@@ -67,21 +69,24 @@ const ProductList = () => {
 
   const handlePlaceOrder = async (product) => {
     if (!product) return;
-
+  
     const orderData = {
       productId: product._id,
       winnerId: localStorage.getItem("userId"), // Assuming buyer is the user
       amount: parseFloat(orderAmount),
       sellerId: product.ownerId,
     };
-
+  
     try {
       await dispatch(createOrder(orderData)).unwrap();
       setOrderAmount("");
+      // Reload the page after successful order
+      window.location.reload();
     } catch (error) {
       console.error("Order creation error:", error);
     }
   };
+  
 
   // Filter products based on the switch and additional filters
   const filteredProducts = products
@@ -149,7 +154,7 @@ const ProductList = () => {
         />
 
         {/* Filter by Category */}
-        <Select onValueChange={setFilterCategory} value={filterCategory}>
+        {/* <Select onValueChange={setFilterCategory} value={filterCategory}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Filter Category" />
           </SelectTrigger>
@@ -161,7 +166,7 @@ const ProductList = () => {
               </SelectItem>
             ))}
           </SelectContent>
-        </Select>
+        </Select> */}
       </div>
 
       {/* Loading and Error Handling */}
@@ -191,7 +196,7 @@ const ProductList = () => {
 
       {/* No Products Found */}
       {filteredProducts.length === 0 && !loading && (
-        <div className="text-center text-gray-500 mt-10">No products found</div>
+        <div className="text-center text-gray-500 mt-10">{t("noProductsFound")}</div>
       )}
     </div>
   );

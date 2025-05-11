@@ -93,14 +93,15 @@ function Navbar() {
     <div className="navbar bg-gradient-to-r from-green-500 to-emerald-600">
       <nav>
         <div className="logo text-white">
-          <h1>{t("pakAgrihub")}</h1> {/* Translated Website Name */}
+          {/* <h1>{t("pakAgrihub")}</h1> Translated Website Name */}
+          <img src="../../../../public/logo2.png" alt="" height={"60px"}/>
         </div>
 
         <div className={`links ${isOpen ? "open" : ""}`}>
           <ul>{renderLinks()}</ul>
         </div>
 
-        <div className="menu-icon text-white" onClick={toggleMenu}>
+        <div className="menu-icon text-white items-center" onClick={toggleMenu}>
           {isOpen ? t("menuClose") : t("menuOpen")} {/* Translated Menu Text */}
         </div>
       </nav>

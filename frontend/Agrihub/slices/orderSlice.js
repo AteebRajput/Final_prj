@@ -44,8 +44,10 @@ export const deleteOrder = createAsyncThunk(
   "orders/deleteOrder",
   async (orderId, { rejectWithValue }) => {
     try {
+      console.log("Deleting order with ID:", orderId);
       const response = await axios.delete(`${ORDER_API}/delete-order/${orderId}`);
-      if (response.status === 200){
+
+      if (response.status === 200) {
         toast.success("Order Deleted Successfully!", {
           position: "top-left",
           autoClose: 3000,
@@ -56,15 +58,29 @@ export const deleteOrder = createAsyncThunk(
           theme: "dark",
         });
       }
+
       return { orderId };
     } catch (error) {
       console.error("Delete order error:", error);
-      return rejectWithValue(
-        error.response?.data?.message || "Failed to delete the order."
-      );
+
+      const errorMessage =
+        error.response?.data?.error || "Failed to delete the order.";
+
+      toast.error(errorMessage, {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: false,
+        theme: "light",
+      });
+
+      return rejectWithValue(errorMessage);
     }
   }
 );
+
 
 export const fetchFarmerOrders = createAsyncThunk(
   "farmerOrders/fetchFarmerOrders",
@@ -174,9 +190,9 @@ const ordersSlice = createSlice({
           (order) => order._id !== action.payload.orderId
         );
       })
-      .addCase(deleteOrder.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
+      .addCase(deleteOrder.rejected, () => {
+        // state.loading = false;
+        // state.error = action.payload;
       });
 
   },

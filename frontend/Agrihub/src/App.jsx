@@ -25,6 +25,7 @@ import { useSelector } from "react-redux";
 import { ToastContainer } from "react-toastify"; // Import ToastContainer
 import "react-toastify/dist/ReactToastify.css"; // Import Toastify CSS
 import BuyerBids from "./Component/BuyerDashboard/BuyerBids";
+import WeatherDashboard from "./Component/dashboard/Weather.jsx";
 
 const ProtectedRoute = ({ element }) => {
   const isLoggedIn = useSelector((state) => state.user.isLoggedIn);
@@ -68,6 +69,7 @@ function App() {
             <Route path="products" element={<ProductsPage />} />
             <Route path="auctions" element={<AllAuctions />} />
             <Route path="seller-messages" element={<MessagesSeller />} />
+            <Route path="weather" element={<WeatherDashboard />} />
 
           </Route>
 
@@ -81,6 +83,7 @@ function App() {
             <Route path="products" element={<ProductList />} />
             <Route path="orders" element={<BuyerOrder />} />
             <Route path="bids" element={<BuyerBids />} />
+            
 
           </Route>
         </Routes>

@@ -1,6 +1,7 @@
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
-import { VERIFICATION_EMAIL_TEMPLATE, WELCOME_EMAIL_TEMPLATE,PASSWORD_RESET_REQUEST_TEMPLATE, PASSWORD_RESET_SUCCESS_TEMPLATE, AUCTION_CREATED_TEMPLATE } from "./emailTemplates.js";
+import { VERIFICATION_EMAIL_TEMPLATE, WELCOME_EMAIL_TEMPLATE,PASSWORD_RESET_REQUEST_TEMPLATE, PASSWORD_RESET_SUCCESS_TEMPLATE,
+     AUCTION_CREATED_TEMPLATE, AUCTION_SOLD_OWNER_TEMPLATE,AUCTION_WON_WINNER_TEMPLATE, NEW_BID_OWNER_TEMPLATE } from "./emailTemplates.js";
 
 dotenv.config();
 
@@ -141,4 +142,77 @@ export const sendAuctionCreatedEmail = async (email, data) => {
       console.error("Failed to send auction email:", error);
     }
   };
+  
+  export const sendAuctionEndEmaiToOwner = async (email, data) => { 
+    try {
+      const htmlContent = AUCTION_SOLD_OWNER_TEMPLATE
+        .replace("{ownerName}", data.ownerName)
+        .replace("{productName}", data.productName)
+        .replace("{finalPrice}", data.bidAmount)
+        .replace("{winnerName}", data.winnerName)
+        .replace("{winnerEmail}", data.winnerEmail)
+        .replace("{winnerPhone}", data.winnerPhone)
+        .replace("{winnerLocation}", data.winnerLocation);
+  
+      const mailOptions = {
+        to: email,
+        from: `"AgriHub" <${process.env.GMAIL_USER}>`,
+        subject: "Auction Ended - Your Product is Sold!",
+        html: htmlContent,
+      };
+  
+      const info = await transporter.sendMail(mailOptions);
+      console.log("Auction end email sent:", info.messageId);
+    } catch (error) {
+      console.error("Failed to send auction end email:", error);
+    }
+  };
+  
+  export const sendAuctionWinEmailToWinner = async (email, data) => { 
+    try {
+      const htmlContent = AUCTION_WON_WINNER_TEMPLATE
+        .replace("{winnerName}", data.winnerName)
+        .replace("{productName}", data.productName)
+        .replace("{finalPrice}", data.bidAmount)
+        .replace("{ownerName}", data.ownerName)
+        .replace("{ownerEmail}", data.ownerEmail)
+        .replace("{ownerPhone}", data.ownerPhone)
+        .replace("{ownerLocation}", data.ownerLocation);
+  
+      const mailOptions = {
+        to: email,
+        from: `"AgriHub" <${process.env.GMAIL_USER}>`,
+        subject: "Congratulations! You Won an Auction 🎉",
+        html: htmlContent,
+      };
+  
+      const info = await transporter.sendMail(mailOptions);
+      console.log("Auction win email sent:", info.messageId);
+    } catch (error) {
+      console.error("Failed to send auction win email:", error);
+    }
+  };
+  
+  export const sendNewBidEmailToOwner = async (email, data) => { 
+    try {
+      const mailOptions = {
+        to: email,
+        from: `"AgriHub" <${process.env.GMAIL_USER}>`,
+        subject: `New Bid on Your Product: ${data.productName}`,
+        html: NEW_BID_OWNER_TEMPLATE
+          .replace("{ownerName}", data.ownerName)
+          .replace("{productName}", data.productName)
+          .replace("{bidderName}", data.bidderName)
+          .replace("{bidderEmail}", data.bidderEmail)
+          .replace("{bidderPhone}", data.bidderPhone)
+          .replace("{bidderLocation}", data.bidderLocation)
+          .replace("{bidAmount}", data.bidAmount)
+      };
+  
+      const info = await transporter.sendMail(mailOptions);
+      console.log("New bid email sent to owner:", info.messageId);
+    } catch (error) {
+      console.error("Failed to send new bid email to owner:", error);
+    }
+  }
   

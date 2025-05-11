@@ -2,29 +2,38 @@ import Auction from "../models/auctionModel.js";
 import Product from "../models/productModel.js";
 import Order from "../models/orderModel.js";
 import User from "../models/userModel.js";
+import { sendAuctionEndEmaiToOwner,sendAuctionWinEmailToWinner } from "../nodemailer/emails.js";
 
 export const createAuctionController = async (req, res) => {
   try {
     const { productId, bidDuration } = req.body;
-console.log("request hits");
+    console.log("request hits");
 
     // Validate input
-    if (!productId || !bidDuration || !["hours", "days"].includes(bidDuration.unit) || isNaN(bidDuration.value)) {
-      return res.status(400).json({ error: "Invalid input for auction creation" });
+    if (
+      !productId ||
+      !bidDuration ||
+      !["hours", "days"].includes(bidDuration.unit) ||
+      isNaN(bidDuration.value)
+    ) {
+      return res
+        .status(400)
+        .json({ error: "Invalid input for auction creation" });
     }
 
     const product = await Product.findById(productId);
     if (!product) return res.status(404).json({ error: "Product not found" });
-    const sellerInfo = await User.findById(product.seller)
-    console.log("Seller info",sellerInfo);
-    
+    const sellerInfo = await User.findById(product.seller);
+    console.log("Seller info", sellerInfo);
 
     const currentTime = new Date();
-    
+
     const endTime =
       bidDuration.unit === "hours"
         ? new Date(currentTime.getTime() + bidDuration.value * 60 * 60 * 1000)
-        : new Date(currentTime.getTime() + bidDuration.value * 24 * 60 * 60 * 1000);
+        : new Date(
+            currentTime.getTime() + bidDuration.value * 24 * 60 * 60 * 1000
+          );
 
     const auction = new Auction({
       productId,
@@ -44,11 +53,11 @@ console.log("request hits");
       expiryDate: product.expiryDate.toDateString(),
       location: product.location,
       bidEndTime: endTime.toDateString(),
-      productURL: `https://your-domain.com/products/${product._id}`
+      productURL: `https://your-domain.com/products/${product._id}`,
     });
     await auction.save();
 
-    res.status(201).json({ message: "Auction created successfully",auction});
+    res.status(201).json({ message: "Auction created successfully", auction });
   } catch (error) {
     console.error("Error creating auction:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -62,17 +71,19 @@ export const getFarmerAuctionsController = async (req, res) => {
     // console.log('Fetch request is made', userId);
 
     if (!userId) {
-      return res.status(400).json({ error: 'User ID is required' });
+      return res.status(400).json({ error: "User ID is required" });
     }
 
     const auctions = await Auction.find({ ownerId: userId })
-      .populate('productId', 'name')
-      .populate('highestBid.bidder', 'name')
+      .populate("productId", "name")
+      .populate("highestBid.bidder", "name")
       .lean();
 
-    const formattedAuctions = auctions.map(auction => ({
+    const formattedAuctions = auctions.map((auction) => ({
       id: auction._id,
-      productName: auction.productId ? auction.productId.name : 'Unknown Product', // Handle null productId
+      productName: auction.productId
+        ? auction.productId.name
+        : "Unknown Product", // Handle null productId
       basePrice: auction.basePrice,
       highestBid: auction.highestBid,
       bidderCount: auction.bidders ? auction.bidders.length : 0, // Handle missing bidders array
@@ -84,8 +95,8 @@ export const getFarmerAuctionsController = async (req, res) => {
 
     res.status(200).json(formattedAuctions);
   } catch (error) {
-    console.error('Error fetching farmer auctions:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Error fetching farmer auctions:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -93,24 +104,22 @@ export const getAuctionBidsController = async (req, res) => {
   try {
     const { auctionId } = req.params;
 
-    const auction = await Auction.findById(auctionId)
-      .populate({
-        path: 'bidders.bidder',
-        select: 'name'
-      });
+    const auction = await Auction.findById(auctionId).populate({
+      path: "bidders.bidder",
+      select: "name",
+    });
 
     if (!auction) {
       return res.status(404).json({ error: "Auction not found" });
     }
     // console.log("These are the functions:",auction);
-    
+
     res.status(200).json(auction.bidders);
   } catch (error) {
-    console.error('Error fetching auction bids:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Error fetching auction bids:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
-
 
 export const endAuctionController = async (req, res) => {
   try {
@@ -134,10 +143,12 @@ export const endAuctionController = async (req, res) => {
 
     // Check whether the auction has expired or if manual ending is triggered
     if (manualEnd || new Date() > auction.endTime) {
-      console.log(manualEnd ? "Ending auction manually" : "Auction time has passed.");
+      console.log(
+        manualEnd ? "Ending auction manually" : "Auction time has passed."
+      );
 
       // Call helper function to end the auction (same logic for both manual and auto-ending)
-      await endAuction(auction,auctionId);
+      await endAuction(auction, auctionId);
 
       return res.status(200).json({
         message: "Auction ended successfully",
@@ -153,50 +164,79 @@ export const endAuctionController = async (req, res) => {
 };
 
 // Helper function to handle auction ending process (winner logic and order creation)
-export const endAuction = async (auction,auctionId) => {
-  auction.status = "expired"; // Set status to "ended"
+export const endAuction = async (auction, auctionId) => {
+  try {
+    auction.status = "expired";
 
-  if (auction.highestBid) {
-    console.log("Auction has a highest bidder. Marking winner and creating order.");
+    if (auction.highestBid) {
+      console.log("Auction has a highest bidder. Marking winner and creating order.");
 
-    // Create an order for the highest bid (winner)
-    const order = new Order({
-      productId: auction.productId,
-      buyerId: auction.highestBid.bidder,
-      sellerId: auction.ownerId,
-      orderType: "auction", // Set orderType to "auction"
-      auctionId: auction._id, // Link the auction
-      bidAmount: auction.highestBid.amount, // Set bid amount from highest bid
-      totalAmount: auction.highestBid.amount, // Set total amount to bidAmount (this is handled by pre-save)
-      status: 'completed',  // Set appropriate status
-    });
-  
+      const order = new Order({
+        productId: auction.productId,
+        buyerId: auction.highestBid.bidder,
+        sellerId: auction.ownerId,
+        orderType: "auction",
+        auctionId: auction._id,
+        bidAmount: auction.highestBid.amount,
+        totalAmount: auction.highestBid.amount,
+        status: "completed",
+      });
 
-    await order.save();
+      await order.save();
 
-    // Optional: Update product to mark it as sold and remove from active listings
-    await Product.findByIdAndUpdate(auction.productId, {
-      status: "sold",
-      upForAuction: false,
-    });
-  } else {
-    console.log("No bids placed. Auction ended without a winner.");
+      await Product.findByIdAndUpdate(auction.productId, {
+        status: "sold",
+        upForAuction: false,
+      });
+
+      const [seller, buyer, product] = await Promise.all([
+        User.findById(auction.ownerId),
+        User.findById(auction.highestBid.bidder),
+        Product.findById(auction.productId),
+      ]);
+
+      const data = {
+        productName: product.name,
+        ownerName: seller.name,
+        ownerPhone: seller.phone,
+        ownerEmail: seller.email,
+        ownerLocation: seller.location,
+        winnerName: buyer.name,
+        winnerPhone: buyer.phone,
+        winnerEmail: buyer.email,
+        winnerLocation: buyer.location,
+        bidAmount: auction.highestBid.amount,
+      };
+
+      await Promise.all([
+        sendAuctionEndEmaiToOwner(seller.email, data),
+        sendAuctionWinEmailToWinner(buyer.email, data),
+      ]);
+
+    } else {
+      console.log("No bids placed. Auction ended without a winner.");
+    }
+
+    await auction.save();
+
+  } catch (error) {
+    console.error(`Error ending auction ${auctionId}:`, error);
   }
-
-  // Save the updated auction
-  await auction.save();
 };
-
 
 // Fetch auction details for a specific product
 export const getAuctionDetails = async (req, res) => {
   const { productId } = req.params;
-  
+
   try {
-    const auction = await Auction.findOne({ "productId":productId }).populate('highestBid.bidder bidders.bidder'); // Populate bidder data
+    const auction = await Auction.findOne({ productId: productId }).populate(
+      "highestBid.bidder bidders.bidder"
+    ); // Populate bidder data
 
     if (!auction) {
-      return res.status(404).json({ message: 'Auction not found or auction has ended.' });
+      return res
+        .status(404)
+        .json({ message: "Auction not found or auction has ended." });
     }
 
     // Calculate highest bid (if any)
@@ -215,6 +255,11 @@ export const getAuctionDetails = async (req, res) => {
       remainingTime: formattedRemainingTime, // Return remaining time in ms
     });
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching auction details.', error: error.message });
+    res
+      .status(500)
+      .json({
+        message: "Error fetching auction details.",
+        error: error.message,
+      });
   }
 };

@@ -2,34 +2,26 @@ import React from "react";
 import { ShoppingCart, FileText, User, CreditCard,Coins, UserX } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import profileImage from "../../assets/832.jpg"
+import { useTranslation } from "react-i18next";
 
 const BuyerSidebar = () => {
+  const { t } = useTranslation();
   const menuItems = [
     {
       icon: User,
-      label: "Account Information",
+      label: `${t("accountInfo")}`,
       path: "/buyer-dashboard/account",
     },
-    { icon: ShoppingCart, label: "My Orders", path: "/buyer-dashboard/orders" },
+    { icon: ShoppingCart, label: `${t("myOrder")}`, path: "/buyer-dashboard/orders" },
     {
       icon: FileText,
-      label: "Browse Products",
+      label: `${t("browseProducts")}`,
       path: "/buyer-dashboard/products",
     },
     {
-      icon: CreditCard,
-      label: "My Payments",
-      path: "/buyer-dashboard/payments",
-    },
-    {
       icon: Coins,
-      label: "My Bids",
+      label: `${t("myBids")}`,
       path: "/buyer-dashboard/bids",
-    },
-    {
-      icon: UserX,
-      label: "Delete Account",
-      path: "/buyer-dashboard/delete-account",
     },
   ];
 

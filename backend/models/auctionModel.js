@@ -18,7 +18,7 @@ const auctionSchema = new mongoose.Schema({
       createdAt: { type: Date, default: Date.now },
     },
   ],
-  status: { type: String, enum: ["active", "expired"], default: "active" },
+  status: { type: String, enum: ["active", "expired","ending"], default: "active" },
 });
 
 // Middleware to remove bid from auction when a bid is deleted
