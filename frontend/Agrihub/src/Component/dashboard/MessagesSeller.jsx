@@ -30,7 +30,7 @@ export default function MessagesSeller() {
     if (usernames[userId]) return; // already fetched
 
     try {
-      const response = await axios.get(`http://localhost:5000/api/auth/getUsername?userId=${userId}`);
+      const response = await axios.get(`https://backend-production-c261.up.railway.app/api/auth/getUsername?userId=${userId}`);
       const username = response.data.username;
       setUsernames((prev) => ({ ...prev, [userId]: username }));
     } catch (error) {

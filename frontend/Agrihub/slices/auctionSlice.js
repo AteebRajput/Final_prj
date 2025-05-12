@@ -1,10 +1,12 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
-import { User } from "lucide-react";
 
-const AUCTION_api = "http://localhost:5000/api/auction";
-const BID_API = "http://localhost:5000/api/bid";
-const ORDER_API = "http://localhost:5000/api/order";
+
+// local backend url
+// const AUCTION_api = "http://localhost:5000/api/auction";
+const AUCTION_api = "https://backend-production-c261.up.railway.app/api/auction";
+const BID_API = "https://backend-production-c261.up.railway.app/api/bid";
+// const ORDER_API = "https://backend-production-c261.up.railway.app/api/order";/
 
 // Async thunk to fetch auctions
 
@@ -220,7 +222,7 @@ const auctionSlice = createSlice({
         }
       })
       
-      .addCase(getUserSpecifBids.rejected, (state, action) => {
+      .addCase(getUserSpecifBids.rejected, (state) => {
         state.loading = false;
         state.error = true;
         state.bids = [];

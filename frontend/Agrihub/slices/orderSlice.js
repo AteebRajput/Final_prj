@@ -2,7 +2,8 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 import { toast } from "react-toastify";
 
-const ORDER_API = "http://localhost:5000/api/order";
+// const ORDER_API = "http://localhost:5000/api/order";
+const ORDER_API = "https://backend-production-c261.up.railway.app/api/order";
 
 export const fetchOrders = createAsyncThunk("orders/fetchOrders", async () => {
   const userId = JSON.parse(localStorage.getItem("userId"))?.userId;

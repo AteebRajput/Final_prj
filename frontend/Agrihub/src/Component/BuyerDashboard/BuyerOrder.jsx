@@ -47,7 +47,7 @@ const BuyerOrder = () => {
 
   return (
     <div className="p-4">
-      <h1 className="text-xl font-bold mb-4">My Orders</h1>
+      <h1 className="text-2xl text-black font-bold mb-4">My Orders</h1>
       <Table>
         <TableHeader>
           <TableRow>

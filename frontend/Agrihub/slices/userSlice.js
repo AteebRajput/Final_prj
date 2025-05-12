@@ -1,7 +1,8 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const API_AUTH_URL = "http://localhost:5000/api/auth";
+// const API_AUTH_URL = "http://localhost:5000/api/auth";
+const API_AUTH_URL = "https://backend-production-c261.up.railway.app/api/auth";
 
 const extractUserData = (userData) => {
   const {

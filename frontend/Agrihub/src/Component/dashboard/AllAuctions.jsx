@@ -5,6 +5,7 @@ import {
   endAuction,
   fetchAuctionBids,
 } from "../../../slices/auctionSlice.js";
+import { Loader2 } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -52,6 +53,7 @@ const AllAuctions = () => {
 
   const handleEndAuction = (auctionId, ownerId) => {
     dispatch(endAuction({ auctionId, ownerId }));
+    dispatch(fetchAuctionBids())
   };
 
   const handleOpenBids = (auctionId) => {

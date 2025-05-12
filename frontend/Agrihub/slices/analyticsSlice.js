@@ -1,7 +1,9 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const API_URL = "http://localhost:5000/api/analytics";
+// local backend url
+// const API_URL = "http://localhost:5000/api/analytics";
+const API_URL = "https://backend-production-c261.up.railway.app/api/analytics";
 
 // Fetch all sellers analytics
 export const fetchAllSellersAnalytics = createAsyncThunk(

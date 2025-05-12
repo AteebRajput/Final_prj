@@ -2,7 +2,8 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const PRODUCT_API_URL = "http://localhost:5000/api/product";
+// const PRODUCT_API_URL = "http://localhost:5000/api/product";
+const PRODUCT_API_URL = "https://backend-production-c261.up.railway.app/api/product";
 
 export const fetchAllTheProducts = createAsyncThunk(
   "products/fetchAllTheProducts",

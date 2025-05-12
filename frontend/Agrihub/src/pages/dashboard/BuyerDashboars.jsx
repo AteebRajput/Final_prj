@@ -1,6 +1,5 @@
 
 import { Outlet } from "react-router-dom";
-import FarmerSidebar from "../../Component/sidebar/Sidebar";
 import BuyerSidebar from "../../Component/sidebar/BuyerSidebar";
 
 
