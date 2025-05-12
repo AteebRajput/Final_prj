@@ -159,6 +159,8 @@ const resources = {
       extendedWeather: "Extended weather outlook for the week ahead",
       cropAdvisory: "Crop Advisory",
       weatherbasedRecommendations: "Weather-based recommendations for optimal crop management",
+      sellerAnalytics: "Seller Analytics",
+      logistics: "Logistics",
 
     },
   },

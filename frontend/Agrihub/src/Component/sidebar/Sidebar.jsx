@@ -1,4 +1,4 @@
-import { Store, ShoppingCart, Gavel, UserX,CloudSun, User,MessageCircleMore } from "lucide-react";
+import { Store, ShoppingCart, Gavel, Truck,CloudSun, User,MessageCircleMore } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import profileImage from "../../assets/832.jpg"
 import { useTranslation } from "react-i18next";
@@ -12,7 +12,8 @@ const FarmerSidebar = () => {
     { icon: Store, label: `${t("productList")}`, path: "/dashboard/products" },
     { icon: Gavel, label: `${t("allBids")}`, path: "/dashboard/auctions" },
     { icon: MessageCircleMore, label: `${t("messages")}`, path: "/dashboard/seller-messages" },
-    { icon: CloudSun, label: `${t("weather")}`, path: "/dashboard/weather" } // New weather route
+    { icon: CloudSun, label: `${t("weather")}`, path: "/dashboard/weather" }, // New weather route
+    { icon: Truck, label: `${t("logistics")}`, path: "/dashboard/logistics" } // New weather route
   ];
   const data = JSON.parse(localStorage.getItem("user"));
 

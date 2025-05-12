@@ -26,6 +26,9 @@ import { ToastContainer } from "react-toastify"; // Import ToastContainer
 import "react-toastify/dist/ReactToastify.css"; // Import Toastify CSS
 import BuyerBids from "./Component/BuyerDashboard/BuyerBids";
 import WeatherDashboard from "./Component/dashboard/Weather.jsx";
+import Sellers from "./Component/BuyerDashboard/SellerAnalytics.jsx";
+import DetailedSellerAnalytics from "./Component/BuyerDashboard/DetailedSellerAnalytics.jsx";
+import LogisticsPage from "./Component/BuyerDashboard/Logistics.jsx";
 
 const ProtectedRoute = ({ element }) => {
   const isLoggedIn = useSelector((state) => state.user.isLoggedIn);
@@ -70,6 +73,7 @@ function App() {
             <Route path="auctions" element={<AllAuctions />} />
             <Route path="seller-messages" element={<MessagesSeller />} />
             <Route path="weather" element={<WeatherDashboard />} />
+            <Route path="logistics" element={<LogisticsPage />} />
 
           </Route>
 
@@ -83,6 +87,9 @@ function App() {
             <Route path="products" element={<ProductList />} />
             <Route path="orders" element={<BuyerOrder />} />
             <Route path="bids" element={<BuyerBids />} />
+            <Route path="sellers" element={<Sellers />} />
+            <Route path="sellers/:id" element={<DetailedSellerAnalytics />} />
+            <Route path="logistics" element={<LogisticsPage />} />
             
 
           </Route>

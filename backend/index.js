@@ -9,6 +9,7 @@ import productRouter from "./routes/productRoute.js";
 import auctionRouter from "./routes/auctionRouter.js";
 import bidRouter from "./routes/bidRoute.js";
 import orderRouter from "./routes/orderRoutes.js";
+import analyticsRouter from "./routes/analyticsRouter.js";
 import {expireBids,autoEndAuction} from "./cronJobs.js";
 
 // load enviroment variable
@@ -42,6 +43,7 @@ app.use("/api/product", productRouter);
 app.use("/api/auction", auctionRouter);
 app.use("/api/bid", bidRouter);
 app.use("/api/order", orderRouter);
+app.use("/api/analytics", analyticsRouter);
 
 app.get("/", (req, res) => {
   res.send("Hello world");

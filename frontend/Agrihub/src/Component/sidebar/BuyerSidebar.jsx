@@ -1,7 +1,6 @@
-import React from "react";
-import { ShoppingCart, FileText, User, CreditCard,Coins, UserX } from "lucide-react";
+import { ShoppingCart, FileText, User, Coins, ChartPie, Truck } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
-import profileImage from "../../assets/832.jpg"
+import profileImage from "../../assets/832.jpg";
 import { useTranslation } from "react-i18next";
 
 const BuyerSidebar = () => {
@@ -12,7 +11,11 @@ const BuyerSidebar = () => {
       label: `${t("accountInfo")}`,
       path: "/buyer-dashboard/account",
     },
-    { icon: ShoppingCart, label: `${t("myOrder")}`, path: "/buyer-dashboard/orders" },
+    {
+      icon: ShoppingCart,
+      label: `${t("myOrder")}`,
+      path: "/buyer-dashboard/orders",
+    },
     {
       icon: FileText,
       label: `${t("browseProducts")}`,
@@ -23,12 +26,21 @@ const BuyerSidebar = () => {
       label: `${t("myBids")}`,
       path: "/buyer-dashboard/bids",
     },
+    {
+      icon: ChartPie,
+      label: `${t("sellerAnalytics")}`,
+      path: "/buyer-dashboard/sellers",
+    },
+    {
+      icon: Truck,
+      label: `${t("logistics")}`,
+      path: "/buyer-dashboard/logistics",
+    },
   ];
 
   const location = useLocation();
   const activePath = location.pathname;
   const data = JSON.parse(localStorage.getItem("user"));
-
 
   return (
     <aside className="fixed top-20 left-0 h-full w-64 bg-white border-r border-gray-200">
@@ -42,7 +54,9 @@ const BuyerSidebar = () => {
               className="w-full h-full object-cover"
             />
           </div>
-          <h2 className="text-lg font-semibold text-gray-900">{data?.user.name}</h2>
+          <h2 className="text-lg font-semibold text-gray-900">
+            {data?.user.name}
+          </h2>
           <p className="text-sm text-gray-500">{data?.user.company}</p>
         </div>
       </div>
