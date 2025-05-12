@@ -105,7 +105,6 @@ export const getSellerDetailedAnalytics = async (req, res) => {
         }
       }
     ]);
-    console.log(orderStats);
     
     // Organize order statistics
     const orderStatusMap = orderStats.reduce((acc, stat) => {
@@ -252,6 +251,22 @@ export const getSellerDetailedAnalytics = async (req, res) => {
       }
     ]);
     
+    // Get recent auctions (last 5)
+    const recentAuctions = await Auction.find({ ownerId: seller._id })
+      .sort({ endTime: -1 })
+      .limit(5)
+      .populate('productId', 'name basePrice')
+      .lean();
+    
+    const formattedRecentAuctions = recentAuctions.map(auction => ({
+      id: auction._id,
+      productName: auction.productId?.name || 'Unknown Product',
+      basePrice: auction.basePrice,
+      finalPrice: auction.status === 'expired' ? (auction.highestBid?.amount || auction.basePrice) : null,
+      bidders: auction.bidders.length,
+      status: auction.status
+    }));
+    
     // Prepare response object according to requested format
     const analyticsData = {
       basicInfo,
@@ -277,7 +292,8 @@ export const getSellerDetailedAnalytics = async (req, res) => {
       },
       graphData,
       recentOrders: formattedRecentOrders,
-      topProducts
+      topProducts,
+      recentAuctions: formattedRecentAuctions
     };
     
     res.status(200).json({

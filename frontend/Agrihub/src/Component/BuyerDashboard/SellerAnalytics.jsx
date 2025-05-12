@@ -24,7 +24,7 @@ export default function Sellers() {
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-10 border-b bg-background">
         <div className="container flex h-16 items-center justify-between py-4">
-          <h1 className="text-xl font-bold">AgriTech Empowering Farmers</h1>
+          <h1 className="text-3xl font-bold text-black ">AgriTech Empowering Farmers</h1>
           <div className="flex items-center gap-4">
             {/* <div className="relative w-full max-w-sm">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -45,7 +45,7 @@ export default function Sellers() {
       <main className="flex-1">
         <div className="container py-6">
           <div className="mb-6">
-            <h2 className="text-2xl font-bold tracking-tight">Seller Analytics</h2>
+            <h2 className="text-2xl font-bold tracking-tight text-black">Seller Analytics</h2>
             <p className="text-muted-foreground">
               View detailed performance metrics for all sellers on the platform.
             </p>

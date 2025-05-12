@@ -6,6 +6,7 @@ import { Link, useNavigate } from "react-router-dom";
 import Input from "../../Component/Input";
 import { loginUser } from "../../../slices/userSlice";
 import { useDispatch, useSelector } from "react-redux";
+import img from "../../../public/img3.jpg";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -45,7 +46,12 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="login-div">
+    <div
+      className="min-h-screen flex items-center justify-center px-4 bg-cover bg-center"
+      style={{
+        backgroundImage: `url(${img})`, 
+      }}
+    >
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

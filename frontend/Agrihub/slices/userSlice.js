@@ -196,6 +196,20 @@ export const forgotPassword = createAsyncThunk(
   }
 );
 
+// reducers/authSlice.js or wherever your thunks are defined
+export const resetPassword = createAsyncThunk(
+  "auth/resetPassword",
+  async ({ userId, password }, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`${API_AUTH_URL}/reset-password/${userId}`, {
+        password,
+      });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || "Something went wrong");
+    }
+  }
+);
 
 
 
@@ -325,6 +339,19 @@ const userSlice = createSlice({
         state.status = 'failed';
         state.error = action.payload;
       })
+      .addCase(resetPassword.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.message = null;
+      })
+      .addCase(resetPassword.fulfilled, (state, action) => {
+        state.loading = false;
+        state.message = action.payload.message || "Password reset successfully";
+      })
+      .addCase(resetPassword.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || "Failed to reset password";
+      });
 
 
   },

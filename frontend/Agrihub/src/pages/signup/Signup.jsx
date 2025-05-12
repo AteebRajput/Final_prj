@@ -4,7 +4,8 @@ import { useSelector, useDispatch } from "react-redux";
 import { signupUser } from "../../../slices/userSlice";
 import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css"; // Import Toastify styles
+import "react-toastify/dist/ReactToastify.css";
+import img from "../../../public/img3.jpg";
 
 function Signup() {
   const dispatch = useDispatch();
@@ -142,7 +143,12 @@ function Signup() {
   
 
   return (
-    <div className="main-signup">
+        <div
+          className="min-h-screen flex items-center justify-center px-4 bg-cover bg-center"
+          style={{
+            backgroundImage: `url(${img})`, 
+          }}
+        >
       <ToastContainer />
       <div className="signup-container">
         <h1>SIGN-UP</h1>

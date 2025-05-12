@@ -37,7 +37,6 @@ import {
 // } from "../ui/product-ui/Chart"
 // import ChartContainer from "../ui/product-ui/Chart.jsx"
 import ChartContainer from "../ui/product-ui/Chart.jsx"
-import axios from "axios"
 // import { fetchSellerDetailedAnalytics } from "../../../slices/analyticsSlice";
 import { fetchSellerDetailedAnalytics } from "../../../slices/analyticsSlice"
 import { useSelector,useDispatch } from "react-redux"
@@ -52,11 +51,6 @@ const DetailedSellerAnalytics = () => {
     useEffect(() => {
       dispatch(fetchSellerDetailedAnalytics(sellerId));
     }, [dispatch, sellerId]);
-  
-    const graphRevenue = sellerDetailedAnalytics?.graphData?.revenue || [];
-    const graphOrders = sellerDetailedAnalytics?.graphData?.orders || [];
-    const recentOrders = sellerDetailedAnalytics?.recentOrders || [];
-    const topProducts = sellerDetailedAnalytics?.topProducts || [];
   
     const seller = {
       id: sellerId,
@@ -80,30 +74,38 @@ const DetailedSellerAnalytics = () => {
       expiredProducts: sellerDetailedAnalytics?.productStats?.expiredProducts || 0,
       totalAuctions: sellerDetailedAnalytics?.auctionStats?.total || 0,
       successfulAuctions: sellerDetailedAnalytics?.auctionStats?.successful || 0,
-      revenue: graphRevenue.map((item) => ({
+      revenue: sellerDetailedAnalytics?.graphData?.revenue?.map((item) => ({
         month: new Date(item.month + "-01").toLocaleString("default", { month: "short" }),
         value: item.value,
-      })),
-      orders: graphOrders.map((item) => ({
+      })) || [],
+      orders: sellerDetailedAnalytics?.graphData?.orders?.map((item) => ({
         month: new Date(item.month + "-01").toLocaleString("default", { month: "short" }),
         value: item.value,
-      })),
-      recentOrders: recentOrders.map((order) => ({
+      })) || [],
+      recentOrders: sellerDetailedAnalytics?.recentOrders?.map((order) => ({
         id: order.id,
         product: order.productName,
         date: new Date(order.createdAt).toISOString().split("T")[0],
         amount: order.amount,
         status: order.status,
-      })),
-      topProducts: topProducts.map((product) => ({
+      })) || [],
+      topProducts: sellerDetailedAnalytics?.topProducts?.map((product) => ({
         name: product.name,
-        quantity: product.quantity, // placeholder
-        unit: product.unit,     // placeholder
+        quantity: product.quantity,
+        unit: product.unit,
         sales: product.totalSales,
         orders: product.count,
-      })),
+      })) || [],
+      recentAuctions: sellerDetailedAnalytics?.recentAuctions?.map((auction) => ({
+        id: auction.id,
+        product: auction.productName,
+        basePrice: auction.basePrice,
+        finalPrice: auction.finalPrice,
+        bidders: auction.bidders,
+        status: auction.status,
+      })) || [],
     };
-  
+    
 
 
       
@@ -138,7 +140,7 @@ const DetailedSellerAnalytics = () => {
                 <ArrowLeft className="h-4 w-4" />
               </Button>
             </Link> */}
-            <h1 className="text-xl font-bold">Seller Analytics</h1>
+            <h1 className="text-3xl text-black font-bold">Seller Analytics</h1>
           </div>
           <Avatar>
             <AvatarImage src="/placeholder.svg" alt="User" />
@@ -150,7 +152,7 @@ const DetailedSellerAnalytics = () => {
         <div className="container py-6">
           <div className="mb-6 flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold tracking-tight">{seller.name}</h2>
+              <h2 className="text-2xl font-bold text-black tracking-tight">{seller.name}</h2>
               <p className="text-muted-foreground">
                 {seller.location} • Joined {seller.joinedDate}
               </p>
@@ -159,7 +161,7 @@ const DetailedSellerAnalytics = () => {
           </div>
 
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            <Card>
+            {/* <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
                 <DollarSign className="h-4 w-4 text-muted-foreground" />
@@ -168,7 +170,7 @@ const DetailedSellerAnalytics = () => {
                 <div className="text-2xl font-bold">Rs. {seller.totalSales.toLocaleString()}</div>
                 <p className="text-xs text-muted-foreground">+20.1% from last month</p>
               </CardContent>
-            </Card>
+            </Card> */}
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
@@ -528,42 +530,28 @@ const DetailedSellerAnalytics = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      <TableRow>
-                        <TableCell className="font-medium">Premium Wheat</TableCell>
-                        <TableCell>Rs. 8,000</TableCell>
-                        <TableCell>Rs. 12,500</TableCell>
-                        <TableCell>8</TableCell>
-                        <TableCell>
-                          <Badge className="bg-green-500">Completed</Badge>
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="font-medium">Organic Rice</TableCell>
-                        <TableCell>Rs. 7,000</TableCell>
-                        <TableCell>Rs. 8,700</TableCell>
-                        <TableCell>5</TableCell>
-                        <TableCell>
-                          <Badge className="bg-green-500">Completed</Badge>
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="font-medium">Fresh Tomatoes</TableCell>
-                        <TableCell>Rs. 2,500</TableCell>
-                        <TableCell>-</TableCell>
-                        <TableCell>3</TableCell>
-                        <TableCell>
-                          <Badge className="bg-yellow-500">Active</Badge>
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="font-medium">Basmati Rice</TableCell>
-                        <TableCell>Rs. 9,000</TableCell>
-                        <TableCell>Rs. 9,500</TableCell>
-                        <TableCell>2</TableCell>
-                        <TableCell>
-                          <Badge className="bg-green-500">Completed</Badge>
-                        </TableCell>
-                      </TableRow>
+                    {seller.recentAuctions.map((auction) => (
+  <TableRow key={auction.id}>
+    <TableCell className="font-medium">{auction.product}</TableCell>
+    <TableCell>Rs. {auction.basePrice.toLocaleString()}</TableCell>
+    <TableCell>Rs. {auction.finalPrice.toLocaleString()}</TableCell>
+    <TableCell>{auction.bidders}</TableCell>
+    <TableCell>
+      <Badge
+        className={ 
+          auction.status === "completed"
+            ? "bg-green-500 text-white"
+            : "bg-red-500 text-white"
+        }
+      >
+        {auction.status.charAt(0).toUpperCase() + auction.status.slice(1)}
+      </Badge>
+    </TableCell>
+  </TableRow>
+))}
+
+
+
                     </TableBody>
                   </Table>
                 </CardContent>
