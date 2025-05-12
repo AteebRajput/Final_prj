@@ -200,6 +200,7 @@ function Signup() {
                     name="firstName"
                     value={formData.firstName}
                     onChange={handleChange}
+                    required
                     placeholder="First Name"
                   />
                 </div>
@@ -211,6 +212,7 @@ function Signup() {
                     value={formData.lastName}
                     onChange={handleChange}
                     placeholder="Last Name"
+                    required
                   />
                 </div>
               </div>
@@ -224,7 +226,7 @@ function Signup() {
               />
               <div className="try">
                 <div>
-                  <label className="lab">Company VAT*</label>
+                  <label className="lab">Company VAT</label>
                   <input
                     type="text"
                     name="companyVAT"
@@ -240,17 +242,18 @@ function Signup() {
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
+                    required
                     placeholder="Mobile Number*"
                   />
                 </div>
               </div>
-              <label className="lab">Fiscal Address*</label>
+              <label className="lab">Location*</label>
               <input
                 type="text"
                 name="address"
                 value={formData.address}
                 onChange={handleChange}
-                placeholder="Fiscal Address*"
+                placeholder="Location*"
               />
 
               <label className="lab">Postal Code*</label>

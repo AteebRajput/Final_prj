@@ -1,10 +1,6 @@
 import  { useState, useEffect } from "react";
 import "./LandingPage.css";
-import fb from "../../../assets/facebook.svg";
-import twitter from "../../../assets/linkdin.svg";
-import youtube from "../../../assets/twitter.svg";
-import linkedin from "../../../assets/youtube.svg";
-import wa from "../../../assets/whatsapp.svg";
+
 import nuts from "../../../assets/nuts.svg"
 import oils from "../../../assets/oils.svg"
 import beans from "../../../assets/Beans.svg"
@@ -48,7 +44,7 @@ function LandingPage() {
             <h1 className="animation">{lines[currentLineIndex]}</h1>
             <div className="join-now-section">
               <button className="join-now-btn">Join Now!</button>
-              <div className="social-icons">
+              {/* <div className="social-icons">
                 <a href="#" className="icon">
                   <img src={fb} alt="Facebook" />
                 </a>
@@ -64,7 +60,7 @@ function LandingPage() {
                 <a href="#" className="icon">
                   <img src={youtube} alt="YouTube" />
                 </a>
-              </div>
+              </div> */}
             </div>
           </div>
           {/* Right Section */}

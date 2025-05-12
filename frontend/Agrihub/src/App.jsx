@@ -14,6 +14,7 @@ import LoginPage from "./pages/login/Login";
 import ForgotPasswordPage from "./pages/forgetPassword/ForgetPassword";
 import Dashboard from "./pages/dashboard/Dashboard";
 import AccountInformation from "./Component/dashboard/AccountInformation";
+import ResetPasswordPage from "./pages/resetPassword/ResetPassword.jsx";
 import AllAuctions from "./Component/dashboard/AllAuctions";
 import MyOrders from "./Component/dashboard/MyOrder";
 import ProductsPage from "./Component/dashboard/ProductList";
@@ -60,6 +61,7 @@ function App() {
           <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password/:id" element={<ResetPasswordPage/>} />
 
           {/* Protected Routes */}
           <Route

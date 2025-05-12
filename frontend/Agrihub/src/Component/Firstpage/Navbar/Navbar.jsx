@@ -2,9 +2,10 @@ import "./Navbar.css";
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { logoutUser } from "../../../../slices/userSlice"; // Add the logout action here
+import { logoutUser } from "../../../../slices/userSlice";
 import LanguageSwitcher from "../../../lib/LanguageSwitcher";
-import { useTranslation } from "react-i18next"; // Import useTranslation hook
+import { useTranslation } from "react-i18next";
+import { Menu, X } from 'lucide-react';
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -13,7 +14,7 @@ function Navbar() {
   const dispatch = useDispatch();
   const [userName, setuserName] = useState(null);
   const { isLoggedIn, user } = useSelector((state) => state.user);
-  const { t } = useTranslation(); // Initialize t function for translations
+  const { t } = useTranslation();
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -25,7 +26,7 @@ function Navbar() {
       const userObject = JSON.parse(userData);
       setuserName(userObject.user.name);
     } else {
-      console.log(t("noUserData")); // Translated message
+      console.log(t("noUserData"));
     }
   }, [isLoggedIn, t]);
 
@@ -35,7 +36,7 @@ function Navbar() {
       localStorage.removeItem("user");
       navigate("/login");
     } catch (error) {
-      console.error(`${t("logoutFailed")}`, error); // Translated message
+      console.error(`${t("logoutFailed")}`, error);
     }
   };
 
@@ -48,7 +49,7 @@ function Navbar() {
           </li>
           <li>
             <button className="logout-button" onClick={handleLogout}>
-              {t("logout")} {/* Translated Logout */}
+              {t("logout")}
             </button>
           </li>
         </>
@@ -59,7 +60,7 @@ function Navbar() {
       return (
         <li>
           <button className="auth-button" onClick={() => navigate("/login")}>
-            {t("login")} {/* Translated Login */}
+            {t("login")}
           </button>
         </li>
       );
@@ -67,7 +68,7 @@ function Navbar() {
       return (
         <li>
           <button className="auth-button" onClick={() => navigate("/signup")}>
-            {t("signup")} {/* Translated SignUp */}
+            {t("signup")}
           </button>
         </li>
       );
@@ -76,12 +77,12 @@ function Navbar() {
         <>
           <li>
             <button className="auth-button" onClick={() => navigate("/login")}>
-              {t("login")} {/* Translated Login */}
+              {t("login")}
             </button>
           </li>
           <li>
             <button className="auth-button" onClick={() => navigate("/signup")}>
-              {t("signup")} {/* Translated SignUp */}
+              {t("signup")}
             </button>
           </li>
         </>
@@ -93,8 +94,7 @@ function Navbar() {
     <div className="navbar bg-gradient-to-r from-green-500 to-emerald-600">
       <nav>
         <div className="logo text-white">
-          {/* <h1>{t("pakAgrihub")}</h1> Translated Website Name */}
-          <img src="../../../../public/logo2.png" alt="" height={"60px"}/>
+          <img src="../../../../public/logo2.png" alt="" height={"60px"} />
         </div>
 
         <div className={`links ${isOpen ? "open" : ""}`}>
@@ -102,7 +102,7 @@ function Navbar() {
         </div>
 
         <div className="menu-icon text-white items-center" onClick={toggleMenu}>
-          {isOpen ? t("menuClose") : t("menuOpen")} {/* Translated Menu Text */}
+          {isOpen ? <X size={24} /> : <Menu size={24} />}
         </div>
       </nav>
     </div>

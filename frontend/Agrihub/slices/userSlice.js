@@ -180,6 +180,8 @@ export const forgotPassword = createAsyncThunk(
   "auth/forgotPassword",
   async (userData, { rejectWithValue }) => {
     try {
+      console.log("User data",userData);
+      
       const response = await axios.post(
         `${API_AUTH_URL}/forgot-password`,
         userData
