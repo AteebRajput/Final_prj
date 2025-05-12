@@ -22,7 +22,28 @@ export const addProductController = async (req, res) => {
       seller,
     } = req.body;
 
-    const images = req.files ? req.files.map((file) => file.path) : [];
+    const images = req.body.images || (req.files ? req.files.map(file => file.path) : []);
+
+    // Log to debug request
+    console.log("Incoming Fields:");
+console.log({
+  name,
+  description,
+  category,
+  basePrice,
+  quantity,
+  unit,
+  quality,
+  location,
+  harvestDate,
+  expiryDate,
+  status,
+  upForAuction,
+  bidEndTime,
+  seller,
+  images,
+});
+
 
     // Validation
     if (
@@ -43,41 +64,41 @@ export const addProductController = async (req, res) => {
       return res.status(400).json({ error: "All fields are required" });
     }
 
-    if (isNaN(basePrice) || basePrice <= 0) {
-      return res
-        .status(400)
-        .json({ error: "Base price must be a positive number" });
+    if (isNaN(+basePrice) || +basePrice <= 0) {
+      return res.status(400).json({ error: "Base price must be a positive number" });
     }
 
-    if (isNaN(quantity) || quantity <= 0) {
-      return res
-        .status(400)
-        .json({ error: "Quantity must be a positive number" });
+    if (isNaN(+quantity) || +quantity <= 0) {
+      return res.status(400).json({ error: "Quantity must be a positive number" });
     }
 
-    // Parse dates
     const parsedHarvestDate = new Date(harvestDate);
     const parsedExpiryDate = new Date(expiryDate);
-    if (upForAuction === "true") {
-      var parsedBidEndTime = new Date(bidEndTime);
+    const parsedUpForAuction = upForAuction === 'true';
+
+    let parsedBidEndTime = null;
+    if (parsedUpForAuction) {
+      if (!bidEndTime) {
+        return res.status(400).json({ error: "Bid end time is required for auctions" });
+      }
+      parsedBidEndTime = new Date(bidEndTime);
     }
 
-    // Create product
     const product = new Product({
       name,
       description,
       category,
       seller,
       images,
-      basePrice: Number(basePrice),
-      quantity: Number(quantity),
+      basePrice: +basePrice,
+      quantity: +quantity,
       unit,
       quality,
       location,
       harvestDate: parsedHarvestDate,
       expiryDate: parsedExpiryDate,
       status,
-      upForAuction: upForAuction === "true",
+      upForAuction: parsedUpForAuction,
       bidEndTime: parsedBidEndTime,
     });
 
@@ -85,12 +106,11 @@ export const addProductController = async (req, res) => {
 
     let auction = null;
 
-    // Create auction if required
-    if (upForAuction === "true") {
+    if (parsedUpForAuction && parsedBidEndTime) {
       auction = new Auction({
         productId: product._id,
         ownerId: seller,
-        basePrice: Number(basePrice),
+        basePrice: +basePrice,
         endTime: parsedBidEndTime,
         status: "active",
       });
@@ -103,6 +123,7 @@ export const addProductController = async (req, res) => {
       product,
       ...(auction && { auction }),
     });
+
   } catch (error) {
     console.error("Error adding product:", error);
     res.status(500).json({ error: "Internal server error" });
